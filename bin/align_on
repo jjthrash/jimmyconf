@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+on = ARGV.shift
+
+lines = readlines
+
+newindex = lines.collect { |line| line.index(on) || -1 }.max
+
+puts lines.collect { |line|
+    if line.index(on)
+        oldindex = line.index(on)
+        line.sub(on, " "*(newindex-oldindex) + on)
+    else
+        line
+    end
+}.join("")

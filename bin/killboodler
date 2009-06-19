@@ -1,0 +1,4 @@
+#!/bin/sh
+
+#echo kill `ps ax | grep boodler.py | grep -v grep | awk "{ print \\$1 }"`
+kill `ps ax | grep boodler.py | grep -v grep | awk "{ print \\$1 }"`

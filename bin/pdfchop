@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+`pdftk "#{ARGV[0]}" dump_data` =~ /^NumberOfPages: (\d+)$/
+system "pdftk \"#{ARGV[0]}\" cat 1-#{$1.to_i - 1} output \"#{ARGV[1]}\""

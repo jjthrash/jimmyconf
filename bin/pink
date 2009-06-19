@@ -1,0 +1,5 @@
+#!/bin/sh
+
+export BOODLER_SOUND_PATH=/home/jjthrash/lib/boodler-snd
+export BOODLER_EFFECTS_PATH=/home/jjthrash/lib/boodler-effect
+boodler.py --output=alsa noise.Pink
