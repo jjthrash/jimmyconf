@@ -104,6 +104,8 @@ EOF
 endfunction
 
 function! GitBlame()
+mark z
+normal gg
 let s:other = @%
 vnew
 execute "r!git blame " s:other
@@ -118,6 +120,7 @@ normal l
 set scb
 set nowrap
 unlet s:other
+normal `z
 endfunction
 "}}}
 
