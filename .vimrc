@@ -102,26 +102,6 @@ puts lines.collect { |line|
 }.join("")
 EOF
 endfunction
-
-function! GitBlame()
-mark z
-normal gg
-let s:other = @%
-vnew
-execute "r!git blame " s:other
-0
-normal dd
-silent %!cut -b'-58'
-set scb
-set nowrap
-set nomodified
-set readonly
-normal l
-set scb
-set nowrap
-unlet s:other
-normal `z
-endfunction
 "}}}
 
 "{{{ Source-code related auto-commands...
