@@ -39,9 +39,20 @@ logMessage s = io $ do
 logPrompt :: X ()
 logPrompt = inputPrompt defaultXPConfig "Log" ?+ logMessage
 
+appendTodo :: String -> X ()
+appendTodo s = io $ appendFile "/home/jjthrash/.todo" (s ++ "\n")
+
+todoPrompt :: X ()
+todoPrompt = inputPrompt defaultXPConfig "TODO" ?+ appendTodo
+
+displayTodo :: X ()
+displayTodo = spawn "xmessage -file /home/jjthrash/.todo"
+
 myKeys conf@(XConfig {XMonad.modMask = modMask}) = mkKeymap conf
     [ ("M-f", sendMessage ToggleStruts)
-    , ("M-S-l", logPrompt)]
+    , ("M-S-l", logPrompt)
+    , ("M-S-a", todoPrompt)
+    , ("M-S-t", displayTodo) ]
 
 myLayout = avoidStruts (tiled ||| Mirror tiled ||| noBorders Full ||| dragPane Horizontal 0.1 0.5)
   where
