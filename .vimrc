@@ -80,6 +80,7 @@ set lcs+=tab:»\ ,eol:¶,trail:·,extends:_,precedes:_
 set listchars+=tab:¸\ ,eol:\ ,trail:·,extends:»,precedes:« 
 set list
 command! W w !sudo tee % > /dev/null
+let mapleader = ","
 
 " In text files, always limit the width of text to 78 characters
 "autocmd BufRead *.txt set tw=78
@@ -201,39 +202,39 @@ endif   " version
   "}}}
 
 "{{{ Sarah's maps
-map ,un yyp:s/./-/g:nohlsearch
-map ,ve :e $VIM/_vimrc
-map ,vu :source $VIM/_vimrc
+map <leader>un yyp:s/./-/g:nohlsearch
+map <leader>ve :e $VIM/_vimrc
+map <leader>vu :source $VIM/_vimrc
 "}}}
 
 "{{{ Jimmy's maps
-map ,i^ :s/^/ /
-vmap ,i^ :s/^/ /
-map ,xx :%!xxd:set nomod
-vmap ,xx :!xxd
-map ,av1 :g/^$/d:g^$/d:%s/\s*-\?\s*(.*$
-map ,av2 :%s/^\d\+\./#
-map ,bx yy2p:s/./ /g<CR>:s/^./<Bar><CR>:s/.$/<Bar><CR>,
-vmap ,, :s/$/,<CR>gvJ$x
-vmap ,! dO<!--<CR>--><ESC>P
-vmap ,* dO/*<CR>*/<ESC>P
-vmap ,# :s/^/#<CR>
-vmap ,; :s/^/;<CR>
+map <leader>i^ :s/^/ /
+vmap <leader>i^ :s/^/ /
+map <leader>xx :%!xxd:set nomod
+vmap <leader>xx :!xxd
+map <leader>av1 :g/^$/d:g^$/d:%s/\s*-\?\s*(.*$
+map <leader>av2 :%s/^\d\+\./#
+map <leader>bx yy2p:s/./ /g<CR>:s/^./<Bar><CR>:s/.$/<Bar><CR>,
+vmap <leader>, :s/$/,<CR>gvJ$x
+vmap <leader>! dO<!--<CR>--><ESC>P
+vmap <leader>* dO/*<CR>*/<ESC>P
+vmap <leader># :s/^/#<CR>
+vmap <leader>; :s/^/;<CR>
 " Reformat ethereal data as XXD data
-map ,xf :%s/^\([0-9a-fA-F]\{4\}\)  /000\1::%s/\([0-9a-fA-F]\{2\}\) \([0-9a-fA-F]\{2\}\)/\1\2/g
-map ,cd :cd %:p:h
-map ,vs :vsplit
-map ,vf ,vsgf
-map ,cc :s/^/\/\//
-map ,cu :s/^\(\s*\)\/\//\1/
-"map ,td :call Todo()
-map ,td :r!date +\%Y-\%m-\%d\ \%a<CR>
-map ,lg yypILOG(Trace, L"A");
-map ,cw yyp:s/"/\\"/geIConsole.WriteLine("A");
+map <leader>xf :%s/^\([0-9a-fA-F]\{4\}\)  /000\1::%s/\([0-9a-fA-F]\{2\}\) \([0-9a-fA-F]\{2\}\)/\1\2/g
+map <leader>cd :cd %:p:h
+map <leader>vs :vsplit
+map <leader>vf ,vsgf
+map <leader>cc :s/^/\/\//
+map <leader>cu :s/^\(\s*\)\/\//\1/
+"map <leader>td :call Todo()
+map <leader>td :r!date +\%Y-\%m-\%d\ \%a<CR>
+map <leader>lg yypILOG(Trace, L"A");
+map <leader>cw yyp:s/"/\\"/geIConsole.WriteLine("A");
 map Y y$
-vmap ,dc !dc<CR>
-nmap ,dc V!dc<CR>
-nmap ,gb :call GitBlame()<CR>
+vmap <leader>dc !dc<CR>
+nmap <leader>dc V!dc<CR>
+nmap <leader>gb :call GitBlame()<CR>
 
 function! Todo()
    normal :vnew
