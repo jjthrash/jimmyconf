@@ -11,7 +11,6 @@ import XMonad
 import XMonad.Config.Gnome
 import XMonad.Util.EZConfig
 import XMonad.Layout.NoBorders
-import XMonad.Layout.DragPane
 import XMonad.Prompt
 import XMonad.Prompt.Input
 import System.Exit
@@ -54,7 +53,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = mkKeymap conf
     , ("M-S-a", todoPrompt)
     , ("M-S-t", displayTodo) ]
 
-myLayout = avoidStruts (tiled ||| Mirror tiled ||| noBorders Full ||| dragPane Horizontal 0.1 0.5)
+myLayout = avoidStruts (tiled ||| Mirror tiled ||| noBorders Full)
   where
      tiled   = Tall nmaster delta ratio
      nmaster = 1
