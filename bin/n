@@ -1,0 +1,4 @@
+#!/bin/bash
+
+$*
+notify-send -t 0 "DONE($?): $*"
