@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'json'
+require 'punch'
+
+def this_friday
+    date = Date.today
+    date += 1 while date.wday != 5
+    date
+end
+
+def this_week
+    friday = this_friday
+    (-4..0).collect do |d|
+        friday - d
+    end
+end
+
+def time_from_date(date)
+    Time.local(date.year, date.month, date.mday)
+end
+
+def format_duration(seconds)
+    hours = seconds / 3600
+    seconds -= hours * 3600
+    minutes = seconds / 60
+    seconds -= minutes * 60
+    '%02d:%02d:%02d' % [hours, minutes, seconds]
+end
+
+proj = Punch.new('lenovo')
+
+friday = this_friday
+(-4..0).zip(-3..1) do |b, e|
+    puts Date::DAYNAMES[(friday + b).wday],
+         format_duration(proj.summary(
+                    :after => time_from_date(friday + b),
+                    :before => time_from_date(friday + e))['unspecified'])
+end
