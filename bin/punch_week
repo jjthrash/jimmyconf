@@ -3,17 +3,13 @@ require 'rubygems'
 require 'json'
 require 'punch'
 
-def this_friday
-    date = Date.today
+def following_friday(date)
     date += 1 while date.wday != 5
     date
 end
 
-def this_week
-    friday = this_friday
-    (-4..0).collect do |d|
-        friday - d
-    end
+def this_friday
+    following_friday Date.today
 end
 
 def time_from_date(date)
@@ -31,6 +27,7 @@ end
 proj = Punch.new('lenovo')
 
 friday = this_friday
+friday = following_friday(Date.parse(ARGV[0])) if ARGV[0]
 (-4..0).zip(-3..1) do |b, e|
     puts Date::DAYNAMES[(friday + b).wday],
          format_duration(proj.summary(
