@@ -23,20 +23,26 @@ def format_duration(seconds)
     '%02d:%02d' % [hours, minutes]
 end
 
-proj = Punch.new('lenovo')
+if __FILE__ == $0
+    unless ARGV[0]
+        puts "Need to specify a project"
+    else
+        proj = Punch.new(ARGV[0])
 
-friday = this_friday
-friday = following_friday(Date.parse(ARGV[0])) if ARGV[0]
-(-4..0).zip(-3..1) do |b, e|
-    puts "%s\n  %s/%.2f (sum: %s)" % [
-        Date::DAYNAMES[(friday + b).wday],
-        format_duration(proj.summary(
-                    :after => time_from_date(friday + b),
-                    :before => time_from_date(friday + e))['unspecified']),
-        proj.summary(
-                    :after => time_from_date(friday + b),
-                    :before => time_from_date(friday + e))['unspecified'].to_f / 3600,
-        format_duration(proj.summary(
-                    :after => time_from_date(friday - 4),
-                    :before => time_from_date(friday + e))['unspecified'])]
+        friday = this_friday
+        friday = following_friday(Date.parse(ARGV[1])) if ARGV[1]
+        (-4..0).zip(-3..1) do |b, e|
+            puts "%s\n  %s/%.2f (sum: %s)" % [
+                Date::DAYNAMES[(friday + b).wday],
+                format_duration(proj.summary(
+                            :after => time_from_date(friday + b),
+                            :before => time_from_date(friday + e))['unspecified']),
+                proj.summary(
+                            :after => time_from_date(friday + b),
+                            :before => time_from_date(friday + e))['unspecified'].to_f / 3600,
+                format_duration(proj.summary(
+                            :after => time_from_date(friday - 4),
+                            :before => time_from_date(friday + e))['unspecified'])]
+        end
+    end
 end
