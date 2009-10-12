@@ -255,7 +255,8 @@ function XmlEscape()
    normal :%s/"/\&quot;/g
 endfunction
 
-map <silent> <TAB> :NERDTreeToggle<CR>
+map <silent> <S-TAB> :NERDTreeToggle<CR>
+map <silent> <TAB> :call BufferList()<CR>
 "}}}
 
 "{{{ Misc
