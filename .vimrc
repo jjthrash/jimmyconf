@@ -208,6 +208,8 @@ map <leader>vu :source $VIM/_vimrc
 "}}}
 
 "{{{ Jimmy's maps
+map <F1> <ESC>
+imap <F1> <ESC>
 map <leader>i^ :s/^/ /
 vmap <leader>i^ :s/^/ /
 map <leader>xx :%!xxd:set nomod
