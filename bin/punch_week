@@ -32,7 +32,7 @@ if __FILE__ == $0
         friday = this_friday
         friday = following_friday(Date.parse(ARGV[1])) if ARGV[1]
         (-4..0).zip(-3..1) do |b, e|
-            puts "%s\n  %s/%.2f (sum: %s)" % [
+            puts "%s\n  %s/%.2f (sum: %s/%.2f)" % [
                 Date::DAYNAMES[(friday + b).wday],
                 format_duration(proj.summary(
                             :after => time_from_date(friday + b),
@@ -42,7 +42,11 @@ if __FILE__ == $0
                             :before => time_from_date(friday + e)).values.inject(0, :+).to_f / 3600,
                 format_duration(proj.summary(
                             :after => time_from_date(friday - 4),
-                            :before => time_from_date(friday + e)).values.inject(0, :+))]
+                            :before => time_from_date(friday + e)).values.inject(0, :+)),
+                proj.summary(
+                            :after => time_from_date(friday - 4),
+                            :before => time_from_date(friday + e)).values.inject(0, :+).to_f / 3600,
+            ]
         end
     end
 end
