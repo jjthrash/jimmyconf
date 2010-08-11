@@ -50,7 +50,7 @@ endif
 map <silent> <S-Tab> :TlistToggle<CR>
 map <M-F10> :!ruby -r xmp -n -e 'xmp($_, "\%l\t\t\# \%r\n")'<CR>
 set nocompatible
-set backspace=indent
+set backspace=indent,eol,start
 set textwidth=0
 set wrapmargin=0
 set nowrap
