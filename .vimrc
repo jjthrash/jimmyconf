@@ -272,14 +272,7 @@ set tags=tags,../tags,../../tags,../../../tags,../../../../tags,../../../../../t
 "}}}
 
 "{{{ Temporary project related
-function! ListSource(glob)
-    execute "normal :r!dir /s /b " . a:glob . "<CR>"
-endfunction
-
-map ,so :!makesession.bat<CR>:e session<CR>
-map ,se gg0dG:call ListSource("src\*.cs")<CR>ggdd
-map ,sj gg0dG:r!dir /s /b com\*.java<CR>ggdd
-map ,gd yyP:s/"/\\"/ge<CR>Ig_debug("<ESC>A");<ESC>
+map ,pr yyp0cw@property (nonatomic, retain) <ESC>
 "}}}
 
 " vim:foldmethod=marker
