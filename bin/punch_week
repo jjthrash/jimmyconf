@@ -3,13 +3,13 @@ require 'rubygems'
 require 'json'
 require 'punch'
 
-def following_friday(date)
-    date += 1 while date.wday != 5
+def following_saturday(date)
+    date += 1 while date.wday != 6
     date
 end
 
-def this_friday
-    following_friday Date.today
+def this_saturday
+    following_saturday Date.today
 end
 
 def time_from_date(date)
@@ -29,23 +29,23 @@ if __FILE__ == $0
     else
         proj = Punch.new(ARGV[0])
 
-        friday = this_friday
-        friday = following_friday(Date.parse(ARGV[1])) if ARGV[1]
-        (-4..0).zip(-3..1) do |b, e|
+        saturday = this_saturday
+        saturday = following_saturday(Date.parse(ARGV[1])) if ARGV[1]
+        (-5..0).zip(-4..1) do |b, e|
             puts "%s\n  %s/%.2f (sum: %s/%.2f)" % [
-                Date::DAYNAMES[(friday + b).wday],
+                Date::DAYNAMES[(saturday + b).wday],
                 format_duration(proj.summary(
-                            :after => time_from_date(friday + b),
-                            :before => time_from_date(friday + e)).values.inject(0, :+)),
+                            :after => time_from_date(saturday + b),
+                            :before => time_from_date(saturday + e)).values.inject(0, :+)),
                 proj.summary(
-                            :after => time_from_date(friday + b),
-                            :before => time_from_date(friday + e)).values.inject(0, :+).to_f / 3600,
+                            :after => time_from_date(saturday + b),
+                            :before => time_from_date(saturday + e)).values.inject(0, :+).to_f / 3600,
                 format_duration(proj.summary(
-                            :after => time_from_date(friday - 4),
-                            :before => time_from_date(friday + e)).values.inject(0, :+)),
+                            :after => time_from_date(saturday - 5),
+                            :before => time_from_date(saturday + e)).values.inject(0, :+)),
                 proj.summary(
-                            :after => time_from_date(friday - 4),
-                            :before => time_from_date(friday + e)).values.inject(0, :+).to_f / 3600,
+                            :after => time_from_date(saturday - 5),
+                            :before => time_from_date(saturday + e)).values.inject(0, :+).to_f / 3600,
             ]
         end
     end
