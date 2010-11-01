@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby -p
+
+$_.gsub!(/(\d\d?:\d\d(?::\d\d)?)/) { |hms|
+  h, m, s = hms.split(/:/).collect {|str| str.to_i}
+  s ||= 0
+  "#{h + m.to_f / 60 + s.to_f / 3600}"
+}
+
+# vim:sw=2:ts=2:sts=2
