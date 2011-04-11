@@ -1,0 +1,110 @@
+#!/usr/bin/env ruby
+
+WEEKLY_DOLLARS = 2350.0
+DEFAULT_RATE = 85.0
+
+require 'rubygems'
+require 'yaml'
+require 'date'
+require 'time'
+require 'ruby-freshbooks'
+
+class Float
+  alias old_round round
+  def round(decimal_places = 0)
+    (self * 10**decimal_places).old_round.to_f / 10**decimal_places
+  end
+end
+
+def last_sunday
+  date = Date.today
+  while date.wday != 0
+    date -= 1
+  end
+
+  date
+end
+
+def round(number, decimals = 2)
+  factor = 10**decimals
+  (number * factor).round.to_f / factor
+end
+
+def time_til_eod
+  (Time.parse("17:00") - Time.now) / 60.0 / 60.0
+end
+
+def beginning_of_today
+  d = Date.today
+  Time.local(d.year, d.month, d.mday)
+end
+
+def Array.wrap(val)
+  case val
+  when nil
+    []
+  when Array
+    val
+  else
+    [val]
+  end
+end
+
+def total_today
+  Array.wrap(client.time_entry.list(:date_from => Date.today.to_s)["time_entries"]["time_entry"]).inject(0) {|m, te|
+    m + te['hours'].to_f
+  }
+end
+
+def client
+  @client ||= FreshBooks::Client.new('brownbirdlabs.freshbooks.com', '8319a5b5826a23c8a96664cd55abf85a')
+end
+
+def times
+  @times ||= begin
+    result = client.time_entry.list(:date_from => last_sunday.to_s)["time_entries"]["time_entry"]
+    Array.wrap(result)
+  end
+end
+
+def projects
+  @projects ||= YAML.load_file(File.expand_path('~/.projects.yml'))
+end
+
+def project_name_for_freshbooks_id(id)
+  projects.to_a.select {|k,v| v['freshbooks_id'] && v['freshbooks_id'].to_s == id.to_s }[0][0]
+end
+
+# how far am I today
+puts "------"
+puts "Today: #{round(total_today, 2)}, #{round(time_til_eod, 2)} left until 17:00 (#{round(total_today + time_til_eod, 2)} possible today)"
+puts ""
+
+# how far am I this week
+puts "This week:"
+report = times.inject({'hours' => 0, 'dollars' => 0}) do |m, entry|
+  project = project_name_for_freshbooks_id(entry["project_id"])
+  project_rate = projects[project]['rate'] ? projects[project]['rate'] : DEFAULT_RATE
+  hours = entry["hours"].to_f || 0.0
+  m['hours'] += hours
+  m['dollars'] += hours * project_rate
+  m['terralien-hours'] ||= 0
+  m['brownbird-hours'] ||= 0
+  if projects[project]['terralien']
+    m['terralien-hours'] += hours
+  else
+    m['brownbird-hours'] += hours
+  end
+  m
+end
+
+puts "Total hours: #{round(report['hours'])} (BBL: #{round(report['brownbird-hours'] || 0)}, T: #{round(report['terralien-hours'] || 0)})"
+puts "Total dollars: $#{round(report['dollars'])}/#{round(WEEKLY_DOLLARS)}"
+puts "Completion: #{round(report['dollars'] / WEEKLY_DOLLARS)*100}%"
+remaining_dollars = WEEKLY_DOLLARS - report['dollars']
+puts "Remaining: $#{remaining_dollars.round(2)}"
+puts "           ~#{round(remaining_dollars / 100.0, 1)} @ 100"
+puts "           ~#{round(remaining_dollars / 85.0, 1)} @ 85"
+#puts results.to_yaml
+
+# vim:ts=2:sts=2:sw=2

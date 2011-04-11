@@ -1,0 +1,76 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'date'
+require 'yaml'
+load File.join(File.dirname(__FILE__), 't2d')
+gem 'ruby-freshbooks'
+
+def client
+  @client ||= FreshBooks::Client.new('brownbirdlabs.freshbooks.com', '8319a5b5826a23c8a96664cd55abf85a')
+end
+
+def projects
+  @projects ||= YAML.load_file(File.expand_path('~/.projects.yml'))
+end
+
+def round(x)
+  (x * 100.0).round / 100.0
+end
+
+def hours(project)
+  list = client.time_entry.list(:project_id => projects[project]['freshbooks_id'])["time_entries"]["time_entry"]
+  list = [list] unless list.kind_of?(Array)
+  list.map {|te|
+    te['hours'].to_f
+  }.inject(0, &:+)
+end
+
+def last_week
+  previous_sunday(Date.today - 7)
+end
+
+def previous_sunday(date)
+  if date.wday == 0
+    date
+  else
+    previous_sunday(date - 1)
+  end
+end
+
+def branch_list
+  `git branch`.chomp.split("\n")
+end
+
+def branches
+  branch_list.map {|s| s[2..-1]}
+end
+
+def current_branch
+  branch_list.find {|s| s.start_with?('* ')}[2..-1]
+end
+
+def branch_statuslog(branch, date)
+  old_branch = current_branch
+  `git checkout #{branch} > /dev/null 2> /dev/null`
+  result =`statuslog #{date}`
+  `git checkout #{old_branch} > /dev/null 2> /dev/null`
+  result.chomp.split("\n")
+end
+
+def statuslog
+  branches.map { |branch|
+    branch_statuslog(branch, last_week)
+  }.flatten.uniq
+end
+
+if __FILE__ == $0
+  if ARGV.count != 1
+    puts "Usage: #{$0} <project>"
+    exit(1)
+  end
+  puts "Last week I spent #{hours(ARGV[0]) rescue '??'} hours doing the following:"
+  puts statuslog.join("\n")
+end
+
+# vim:sts=2 sw=2 ts=2
