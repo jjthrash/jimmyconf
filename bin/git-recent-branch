@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+branches = `git branch`.split("\n").map(&:strip).map {|branch| branch.sub(/^\* /,'')}
+
+sorted = branches.sort_by do |branch|
+  commit = `git cat-file -p #{branch}`
+  commit.lines.grep(/^committer/)[0].scan(/\d{5,}/)[0].to_i
+end
+
+sorted.reverse.each do |branch|
+  date = `git log -1 #{branch}`.lines.grep(/^Date:/)[0].sub(/^Date:\s+/,'').chomp
+  puts "#{branch} - #{date}"
+end
