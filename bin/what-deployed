@@ -29,7 +29,21 @@ def find_deploy_containing(commit)
   end[0]
 end
 
+def usage
+  <<-END
+
+Usage: #{$0} <commit>
+  find the oldest Heroku release that contained the given commit
+
+  END
+end
+
 if __FILE__ == $0
+  if ARGV.length != 1
+    puts usage
+    exit 1
+  end
+
   bad_commit = ARGV[0]
 
   containing_release = find_deploy_containing(bad_commit)
