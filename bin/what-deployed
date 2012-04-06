@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+
+def split_release_line(line)
+  line.strip =~ /^(v\d+)\s+Deploy\s+(\w+)\s+(\S+)\s+(.*)$/
+  [$1, $2, $3, $4.strip]
+end
+
+def commit_contains?(containing_commit, contained_commit)
+  system("git log -1 #{contained_commit}..#{containing_commit} > /dev/null 2> /dev/null")
+  $?.success?
+end
+
+def find_deploy_containing(commit)
+  release_lines = `heroku releases`.split("\n")[2..-1]
+
+  release_lines.inject([nil, nil]) do |m, release_line|
+    result, last = m
+
+    if result
+      m
+    else
+      _, head, _, _ = release = split_release_line(release_line)
+      if commit_contains?(head, commit)
+        [nil, release]
+      else
+        [last, nil]
+      end
+    end
+  end[0]
+end
+
+if __FILE__ == $0
+  bad_commit = ARGV[0]
+
+  containing_release = find_deploy_containing(bad_commit)
+
+  if containing_release
+    puts "Found release: #{containing_release.inspect}"
+  else
+    puts "Didn't find a release containing commit #{bad_commit}"
+  end
+end
