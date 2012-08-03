@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function dangling_commits {
-    git fsck --lost-found | grep commit | awk '{ print $3 }'
+    git fsck --lost-found | awk '/commit/ { print $3 }'
 }
 
 for commit in `dangling_commits`; do
