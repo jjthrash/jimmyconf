@@ -1,3 +1,3 @@
 #!/bin/bash
 
-git log --author=jimmy --pretty=oneline --after=$1 | cut -d' ' -f2- | sed -e 's/^/* /'
+git log --no-decorate --author=jimmy --pretty=oneline --after=$1 | cut -d' ' -f2- | sed -e 's/^/* /'
