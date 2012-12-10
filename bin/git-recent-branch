@@ -1,6 +1,10 @@
 #!/usr/bin/env ruby
 
-branches = `git branch`.split("\n").map(&:strip).map {|branch| branch.sub(/^\* /,'')}
+branches = `git branch`.
+              split("\n").
+              map(&:strip).
+              map {|branch| branch.sub(/^\* /,'')}.
+              reject {|b| b =~ /^\(no branch\)$/ }
 
 sorted = branches.sort_by do |branch|
   commit = `git cat-file -p #{branch}`
