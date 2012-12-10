@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+while gets
+  print $_.gsub(/<[^>]+>/, '')
+end
+
+#vim:ft=ruby
