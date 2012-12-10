@@ -39,9 +39,10 @@ snippet impl
 	${2}
 	@end
 snippet init
-	- (id)init
-	{
-		[super init];
+	- (id)init {
+		if (self = [super init]) {
+			${1}
+		};
 		return self;
 	}
 snippet ifself
@@ -173,8 +174,8 @@ snippet pool
 snippet except
 	NSException *${1:badness};
 	$1 = [NSException exceptionWithName:@"${2:$1Name}"
-	                             reason:@"${3}"
-	                           userInfo:nil];
+								 reason:@"${3}"
+							   userInfo:nil];
 	[$1 raise];
 snippet prag
 	#pragma mark ${1:foo}

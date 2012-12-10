@@ -4495,7 +4495,7 @@ function! RailsBufInit(path)
   endif
   call s:BufSettings()
   call s:BufCommands()
-  call s:BufAbbreviations()
+  "call s:BufAbbreviations()
   " snippetsEmu.vim
   if exists('g:loaded_snippet')
     silent! runtime! ftplugin/rails_snippets.vim

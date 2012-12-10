@@ -128,4 +128,8 @@ function! CucumberComplete(findstart,base) abort
   return sort(steps)
 endfunction
 
+set sw=2
+set ts=2
+set sts=2
+
 " vim:set sts=2 sw=2:
