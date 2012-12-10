@@ -4,9 +4,10 @@ require 'rubygems'
 require 'date'
 require 'yaml'
 load File.join(File.dirname(__FILE__), 't2d')
-gem 'ruby-freshbooks'
 
 def client
+  gem 'ruby-freshbooks'
+  require 'ruby-freshbooks'
   @client ||= FreshBooks::Client.new('brownbirdlabs.freshbooks.com', '8319a5b5826a23c8a96664cd55abf85a')
 end
 
@@ -18,15 +19,18 @@ def round(x)
   (x * 100.0).round / 100.0
 end
 
-def hours(project)
-  list = client.time_entry.list(:project_id => projects[project]['freshbooks_id'])["time_entries"]["time_entry"]
+def hours(project, after = nil, before = nil)
+  opts = {:project_id => projects[project]['freshbooks_id']}
+  opts[:date_from] = after if after
+  opts[:date_to]   = before if before
+  list = client.time_entry.list(opts)["time_entries"]["time_entry"]
   list = [list] unless list.kind_of?(Array)
   list.map {|te|
     te['hours'].to_f
-  }.inject(0, &:+)
+  }.inject(0) {|a,b| a+b}
 end
 
-def last_week
+def weeks_back(count)
   previous_sunday(Date.today - 7)
 end
 
@@ -47,7 +51,7 @@ def branches
 end
 
 def current_branch
-  branch_list.find {|s| s.start_with?('* ')}[2..-1]
+  branch_list.find {|s| s =~ /^\* / }[2..-1]
 end
 
 def branch_statuslog(branch, date)
@@ -60,17 +64,41 @@ end
 
 def statuslog
   branches.map { |branch|
-    branch_statuslog(branch, last_week)
+    branch_statuslog(branch, weeks_back(0))
   }.flatten.uniq
 end
 
 if __FILE__ == $0
-  if ARGV.count != 1
-    puts "Usage: #{$0} <project>"
-    exit(1)
+  require 'optparse'
+
+  options = {
+    :number => 0,
+    :time => true
+  }
+
+  options_parser = OptionParser.new do |opt|
+    opt.banner = "Usage: #{$0} PROJECT"
+    opt.on('-n W', 'how many weeks back (default 0, last week)') do |number|
+      options[:number] = number.to_i
+    end
+    opt.on('-t', 'do not calculate hours') do
+      options[:time] = false
+    end
   end
-  puts "Last week I spent #{hours(ARGV[0]) rescue '??'} hours doing the following:"
-  puts statuslog.join("\n")
+
+  options_parser.parse!
+
+  if ARGV[0]
+    start_date = weeks_back(options[:number])
+    if options[:time]
+      puts "Last week I spent %.2f hours doing the following:" % [hours(ARGV[0], start_date, previous_sunday(start_date + 7)).to_s]
+    else
+      puts "Last week I did the following:"
+    end
+    puts statuslog.join("\n")
+  else
+    puts options_parser
+  end
 end
 
 # vim:sts=2 sw=2 ts=2
