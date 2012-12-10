@@ -1,13 +1,66 @@
 #!/usr/bin/env ruby
 
-WEEKLY_DOLLARS = 2350.0
-DEFAULT_RATE = 85.0
+WEEKLY_DOLLARS = 2600.00
+WEEKLY_HOURS = 30.0
+DEFAULT_RATE = 100.0
+
+API_CALL_LIMIT = 50
 
 require 'rubygems'
+gem 'activesupport',   '~> 3.1.3'
+gem 'httparty',        '~> 0.8.3'
+gem 'ruby-freshbooks', '~> 0.4.1'
+
 require 'yaml'
 require 'date'
 require 'time'
+require 'active_support/cache'
+require 'active_support/time'
+require 'active_support/core_ext/array/wrap'
+
 require 'ruby-freshbooks'
+
+require 'logger'
+
+module FreshBooks
+  class LoggingLimitingClient < TokenClient
+    def initialize(domain, api_token, logger)
+      @logger = logger
+      @calls = []
+      super domain, api_token
+    end
+
+    def post(method, params={})
+      fail_if_too_many_calls!
+
+      @calls << [method, params]
+
+      body = Client.xml_body(method, params)
+      log "\n== Request ==\n#{body}"
+      data = Client.post(api_url, :headers => auth, :body => body)
+      log "\n== Response ==\n#{data.body}\n"
+      Response.new data
+    end
+
+    def log(message)
+      @logger && @logger.info(message)
+    end
+
+    def fail_if_too_many_calls!
+      if @calls.length > API_CALL_LIMIT
+        raise "Too many API calls:\n#{@calls.to_yaml}"
+      end
+    end
+  end
+end
+
+MyEnumerator =
+  if RUBY_VERSION.start_with?("1.8")
+    require 'generator'
+    Generator
+  else
+    Enumerator
+  end
 
 class Float
   alias old_round round
@@ -16,95 +69,208 @@ class Float
   end
 end
 
-def last_sunday
-  date = Date.today
-  while date.wday != 0
-    date -= 1
+module Report
+  def cache
+    @cache ||= ActiveSupport::Cache::FileStore.new(File.join(ENV['HOME'], '.week_report_cache'))
   end
 
-  date
-end
+  def sunday_before(date)
+    if date.wday == 0
+      date
+    else
+      sunday_before(date - 1)
+    end
+  end
 
-def round(number, decimals = 2)
-  factor = 10**decimals
-  (number * factor).round.to_f / factor
-end
+  def sunday_after(date)
+    if date.wday == 0
+      date
+    else
+      sunday_after(date + 1)
+    end
+  end
 
-def time_til_eod
-  (Time.parse("17:00") - Time.now) / 60.0 / 60.0
-end
+  def round(number, decimals = 2)
+    factor = 10**decimals
+    (number * factor).round.to_f / factor
+  end
 
-def beginning_of_today
-  d = Date.today
-  Time.local(d.year, d.month, d.mday)
-end
+  def time_til_eod
+    (Time.parse("17:00") - Time.now) / 60.0 / 60.0
+  end
 
-def Array.wrap(val)
-  case val
-  when nil
-    []
-  when Array
-    val
-  else
-    [val]
+  def beginning_of_today
+    d = Date.today
+    Time.local(d.year, d.month, d.mday)
+  end
+
+  def entries_today
+    @entries_today ||=
+      Array.wrap(client.time_entry.list(:date_from => Date.today.to_s)["time_entries"]["time_entry"])
+  end
+
+  def total_today
+    @total_today ||=
+      entries_today.inject(0) {|m, te|
+        m + te['hours'].to_f
+      }
+  end
+
+  def client
+    @client ||= FreshBooks::LoggingLimitingClient.new('brownbirdlabs.freshbooks.com', '8319a5b5826a23c8a96664cd55abf85a', nil)
+  end
+
+  def times(weeks_ago)
+    all_time_entries = MyEnumerator.new do |g|
+      page = 1
+      date = Date.today - 7*weeks_ago
+      date_from = sunday_before(date).to_s
+      date_to = sunday_after(date).to_s
+      loop do
+        result = client.time_entry.list(:date_from => date_from, :date_to => date_to, :page => page, :per_page => 100)
+        Array.wrap(result['time_entries']['time_entry']).each do |time_entry|
+          g.yield time_entry
+        end
+
+        break if page == result['time_entries']['pages'].to_i
+        page += 1
+      end
+    end
+
+    @times ||= {}
+    @times[weeks_ago] ||=
+      if weeks_ago > 0
+        cache.fetch("times_#{weeks_ago}_weeks_ago", :expires_in => (Date.today.end_of_day - Time.now)) do
+          all_time_entries.to_a
+        end
+      else
+        all_time_entries.to_a
+      end
+  end
+
+  def projects
+    @projects ||= YAML.load_file(File.expand_path('~/.projects.yml'))
+  end
+
+  def project_name_for_freshbooks_id(id)
+    @project_names_for_freshbooks_id ||= {}
+    @project_names_for_freshbooks_id[id] ||=
+      projects.to_a.select {|k,v| v['freshbooks_id'] && v['freshbooks_id'].to_s == id.to_s }[0][0]
+  rescue
+    puts "Error finding project name for freshbooks ID #{id.inspect}"
+  end
+
+  def revenue_for_week(weeks_ago)
+    times(weeks_ago).inject(0.0) do |a, entry|
+      project = project_name_for_freshbooks_id(entry['project_id']) || 'unknown'
+      project_rate = projects[project] && projects[project]['rate'] ? projects[project]['rate'] : DEFAULT_RATE
+      a + entry['hours'].to_f * project_rate
+    end
+  end
+
+  def recent_revenues(number_of_weeks)
+    (0...number_of_weeks).to_a.reverse.map do |weeks_ago|
+      revenue_for_week(weeks_ago)
+    end
+  end
+
+  def trailing_average_revenue(number_of_weeks)
+    recent_revenues(number_of_weeks).inject(&:+) / number_of_weeks
+  end
+
+  def required_revenue_this_week(number_of_trailing_weeks)
+    WEEKLY_DOLLARS * number_of_trailing_weeks - recent_revenues(number_of_trailing_weeks).inject(&:+)
+  end
+
+  def required_revenue_next_week(number_of_trailing_weeks)
+    required_weekly_revenue_over_next_weeks(number_of_trailing_weeks, 1)
+  end
+
+  def required_weekly_revenue_over_next_weeks(trailing_weeks, next_weeks)
+    (WEEKLY_DOLLARS * trailing_weeks - recent_revenues(trailing_weeks - next_weeks).inject(&:+)) / next_weeks
+  end
+
+  def required_weekly_revenue_over_next_weeks_excluding_this_week(trailing_weeks, next_weeks)
+    (WEEKLY_DOLLARS * trailing_weeks - recent_revenues(trailing_weeks - next_weeks + 1)[0..-2].inject(&:+)) / next_weeks
+  end
+
+  def week_report_porcelain(weeks_ago)
+    times(weeks_ago).inject({'hours' => 0.0, 'dollars' => 0.0, 'projects' => {}}) do |m, entry|
+      project = project_name_for_freshbooks_id(entry["project_id"]) || 'unknown'
+      project_rate = projects[project] && projects[project]['rate'] ? projects[project]['rate'] : DEFAULT_RATE
+      hours = entry["hours"].to_f || 0.0
+      m['hours'] += hours
+      m['dollars'] += hours * project_rate
+      m['projects'][project] ||= 0.0
+      m['projects'][project] += hours
+      m
+    end
+  end
+
+  def report_porcelain(weeks_ago)
+    {
+      'today_hours'                    => round(total_today, 2),
+      'today_remaining_til_eod'        => round(time_til_eod, 2),
+      'today_possible'                 => round(total_today + time_til_eod, 2),
+      'week_report'                    => week_report_porcelain(weeks_ago),
+      'required_over_next_three_weeks' => round(required_weekly_revenue_over_next_weeks(10, 3), 2),
+      'required_over_next_two_weeks'   => round(required_weekly_revenue_over_next_weeks(10, 2), 2),
+      'weekly_required_for_avg'        => round(required_weekly_revenue_over_next_weeks_excluding_this_week(10, 3), 2),
+    }
+  end
+
+  def report(weeks_ago, io = $stdout)
+    report = report_porcelain(weeks_ago)
+    week_report = report['week_report']
+
+    io.puts "Week ending #{sunday_after(Date.today - 7*weeks_ago) - 1}"
+    # how far am I today
+    io.puts "------"
+    io.puts "Today: %.2f, %.2f left until 17:00 (%.2f possible today)" % [report['today_hours'],
+                                                                          report['today_remaining_til_eod'],
+                                                                          report['today_possible']]
+    io.puts ""
+
+    # how far am I this week
+
+    percent_complete_this_week = week_report['dollars'] / WEEKLY_DOLLARS
+    milestone_percent = Date.today.wday * 0.2
+    dollars_remaining_until_milestone =
+      begin
+        milestone_dollars = WEEKLY_DOLLARS * milestone_percent
+        milestone_dollars - week_report['dollars']
+      end
+
+    io.puts "This week:"
+    io.puts "Total hours: #{round(week_report['hours'])}"
+    io.puts "Total dollars: $#{round(week_report['dollars'])}/#{round(WEEKLY_DOLLARS)}"
+    io.puts "Completion: %d%% ($%.2f until %d%%)" % [round(percent_complete_this_week)*100,
+                                                     round(dollars_remaining_until_milestone, 2),
+                                                     milestone_percent * 100]
+    remaining_dollars = WEEKLY_DOLLARS - week_report['dollars']
+    io.puts "Remaining: $#{remaining_dollars.round(2)}"
+    [115.0, 105.0, 100.0].each do |rate|
+      io.puts "           ~#{round(remaining_dollars / rate, 1)} @ #{rate}"
+    end
+
+    io.puts ""
+
+    if 6 == Date.today.wday
+      io.puts "Avg catchup required over next 3 weeks: #{report['required_over_next_three_weeks']}"
+    else
+      io.puts "Avg catchup target required for next 3 weeks: #{report['weekly_required_for_avg']} (#{round(week_report['dollars'] / report['weekly_required_for_avg'])*100}% complete)"
+    end
+
+    io.puts ""
+
+    io.puts week_report['projects'].map {|proj, amt| [proj, round(amt, 2)].join(': ')}.join("\n")
+    #puts results.to_yaml
   end
 end
 
-def total_today
-  Array.wrap(client.time_entry.list(:date_from => Date.today.to_s)["time_entries"]["time_entry"]).inject(0) {|m, te|
-    m + te['hours'].to_f
-  }
+if __FILE__ == $0
+  include Report
+
+  weeks_ago = ARGV[0] || 0
+  report(weeks_ago.to_i)
 end
-
-def client
-  @client ||= FreshBooks::Client.new('brownbirdlabs.freshbooks.com', '8319a5b5826a23c8a96664cd55abf85a')
-end
-
-def times
-  @times ||= begin
-    result = client.time_entry.list(:date_from => last_sunday.to_s)["time_entries"]["time_entry"]
-    Array.wrap(result)
-  end
-end
-
-def projects
-  @projects ||= YAML.load_file(File.expand_path('~/.projects.yml'))
-end
-
-def project_name_for_freshbooks_id(id)
-  projects.to_a.select {|k,v| v['freshbooks_id'] && v['freshbooks_id'].to_s == id.to_s }[0][0]
-end
-
-# how far am I today
-puts "------"
-puts "Today: #{round(total_today, 2)}, #{round(time_til_eod, 2)} left until 17:00 (#{round(total_today + time_til_eod, 2)} possible today)"
-puts ""
-
-# how far am I this week
-puts "This week:"
-report = times.inject({'hours' => 0, 'dollars' => 0}) do |m, entry|
-  project = project_name_for_freshbooks_id(entry["project_id"])
-  project_rate = projects[project]['rate'] ? projects[project]['rate'] : DEFAULT_RATE
-  hours = entry["hours"].to_f || 0.0
-  m['hours'] += hours
-  m['dollars'] += hours * project_rate
-  m['terralien-hours'] ||= 0
-  m['brownbird-hours'] ||= 0
-  if projects[project]['terralien']
-    m['terralien-hours'] += hours
-  else
-    m['brownbird-hours'] += hours
-  end
-  m
-end
-
-puts "Total hours: #{round(report['hours'])} (BBL: #{round(report['brownbird-hours'] || 0)}, T: #{round(report['terralien-hours'] || 0)})"
-puts "Total dollars: $#{round(report['dollars'])}/#{round(WEEKLY_DOLLARS)}"
-puts "Completion: #{round(report['dollars'] / WEEKLY_DOLLARS)*100}%"
-remaining_dollars = WEEKLY_DOLLARS - report['dollars']
-puts "Remaining: $#{remaining_dollars.round(2)}"
-puts "           ~#{round(remaining_dollars / 100.0, 1)} @ 100"
-puts "           ~#{round(remaining_dollars / 85.0, 1)} @ 85"
-#puts results.to_yaml
-
-# vim:ts=2:sts=2:sw=2
