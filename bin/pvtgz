@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+if [ $# -ne 2 ]; then
+  echo Usage: `basename $0` \<directory\> \<output tarball\>
+  exit 1
+fi
+
+if [ ! -d $1 ]; then
+  echo Directory $1 does not exist
+  exit 1
+fi
+
+tar cf - $1 | pv -s $(du -sk $1 | awk '{ print $1 }')k | gzip > $2
