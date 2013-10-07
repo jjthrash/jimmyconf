@@ -1,0 +1,3 @@
+#!/bin/sh
+
+pv $1 | gunzip -c > `basename $1 .gz`
