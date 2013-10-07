@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 
-WEEKLY_DOLLARS = 2600.00
-WEEKLY_HOURS = 30.0
-DEFAULT_RATE = 100.0
+load File.expand_path("~/.week_summary")
 
 API_CALL_LIMIT = 50
 
@@ -14,6 +12,7 @@ gem 'ruby-freshbooks', '~> 0.4.1'
 require 'yaml'
 require 'date'
 require 'time'
+require 'set'
 require 'active_support/cache'
 require 'active_support/time'
 require 'active_support/core_ext/array/wrap'
@@ -160,12 +159,51 @@ module Report
     puts "Error finding project name for freshbooks ID #{id.inspect}"
   end
 
-  def revenue_for_week(weeks_ago)
+  def hourly_revenue_for_week(weeks_ago)
     times(weeks_ago).inject(0.0) do |a, entry|
-      project = project_name_for_freshbooks_id(entry['project_id']) || 'unknown'
-      project_rate = projects[project] && projects[project]['rate'] ? projects[project]['rate'] : DEFAULT_RATE
-      a + entry['hours'].to_f * project_rate
+      unless ignored_task?(entry['project_id'], entry['task_id'])
+        project = project_name_for_freshbooks_id(entry['project_id']) || 'unknown'
+        project_rate =
+          if projects[project] && projects[project]['rate_type'] != 'daily'
+            projects[project]['rate'] || DEFAULT_RATE
+          else
+            0.0
+          end
+        a + entry['hours'].to_f * project_rate
+      else
+        a
+      end
     end
+  end
+
+#---
+#time_entry_id: '1023165'
+#staff_id: '1'
+#project_id: '28'
+#task_id: '9'
+#hours: '2.07'
+#date: '2013-09-25'
+#notes:
+#billed: '0'
+
+  def daily_revenue_for_week(weeks_ago)
+    date_to_project =
+      times(weeks_ago).inject({}) do |h, entry|
+        project = project_name_for_freshbooks_id(entry['project_id']) || 'unknown'
+        if projects[project] && projects[project]['rate_type'] == 'daily'
+          h[entry['date']] = project
+        end
+
+        h
+      end
+
+    date_to_project.values.map {|project|
+      projects[project]['rate']
+    }.inject(&:+) || 0.0
+  end
+
+  def revenue_for_week(weeks_ago)
+    hourly_revenue_for_week(weeks_ago) + daily_revenue_for_week(weeks_ago)
   end
 
   def recent_revenues(number_of_weeks)
@@ -194,24 +232,42 @@ module Report
     (WEEKLY_DOLLARS * trailing_weeks - recent_revenues(trailing_weeks - next_weeks + 1)[0..-2].inject(&:+)) / next_weeks
   end
 
+  def ignored_task?(project_id, task_id)
+    project = project_name_for_freshbooks_id(project_id)
+    ignored = projects[project]['ignored_task_ids']
+    ignored && ignored.index(task_id.to_i)
+  end
+
   def week_report_porcelain(weeks_ago)
-    times(weeks_ago).inject({'hours' => 0.0, 'dollars' => 0.0, 'projects' => {}}) do |m, entry|
-      project = project_name_for_freshbooks_id(entry["project_id"]) || 'unknown'
-      project_rate = projects[project] && projects[project]['rate'] ? projects[project]['rate'] : DEFAULT_RATE
-      hours = entry["hours"].to_f || 0.0
-      m['hours'] += hours
-      m['dollars'] += hours * project_rate
-      m['projects'][project] ||= 0.0
-      m['projects'][project] += hours
-      m
-    end
+    h =
+      times(weeks_ago).inject({'hours' => 0.0, 'dollars' => 0.0, 'projects' => {}}) do |m, entry|
+        project = project_name_for_freshbooks_id(entry["project_id"]) || 'unknown'
+        hours = entry["hours"].to_f || 0.0
+        m['hours'] += hours
+        m['projects'][project] ||= 0.0
+        m['projects'][project] += hours
+        m
+      end
+
+    h['dollars'] = revenue_for_week(weeks_ago)
+
+    h
+  end
+
+  def time_since_bod
+    (Time.now - Time.parse("08:00")) / 60 / 60
+  end
+
+  def today_rate
+    total_today / time_since_bod
   end
 
   def report_porcelain(weeks_ago)
     {
       'today_hours'                    => round(total_today, 2),
+      'today_rate'                     => round(today_rate*100, 2),
       'today_remaining_til_eod'        => round(time_til_eod, 2),
-      'today_possible'                 => round(total_today + time_til_eod, 2),
+      'today_possible'                 => round(total_today + [0.0, time_til_eod].min, 2),
       'week_report'                    => week_report_porcelain(weeks_ago),
       'required_over_next_three_weeks' => round(required_weekly_revenue_over_next_weeks(10, 3), 2),
       'required_over_next_two_weeks'   => round(required_weekly_revenue_over_next_weeks(10, 2), 2),
@@ -226,15 +282,16 @@ module Report
     io.puts "Week ending #{sunday_after(Date.today - 7*weeks_ago) - 1}"
     # how far am I today
     io.puts "------"
-    io.puts "Today: %.2f, %.2f left until 17:00 (%.2f possible today)" % [report['today_hours'],
-                                                                          report['today_remaining_til_eod'],
-                                                                          report['today_possible']]
+    io.puts "Today: %.2f, %.2f left until 17:00 (%.2f possible today, rate so far is %.2f%%)" % [report['today_hours'],
+                                                                                                 report['today_remaining_til_eod'],
+                                                                                                 report['today_possible'],
+                                                                                                 report['today_rate']]
     io.puts ""
 
     # how far am I this week
 
     percent_complete_this_week = week_report['dollars'] / WEEKLY_DOLLARS
-    milestone_percent = Date.today.wday * 0.2
+    milestone_percent = [Date.today.wday, 5].min * 0.2
     dollars_remaining_until_milestone =
       begin
         milestone_dollars = WEEKLY_DOLLARS * milestone_percent
@@ -273,4 +330,8 @@ if __FILE__ == $0
 
   weeks_ago = ARGV[0] || 0
   report(weeks_ago.to_i)
+
+  #require 'pry'
+  #t = times(weeks_ago)
+  #binding.pry
 end
