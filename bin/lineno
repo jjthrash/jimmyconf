@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby -p
+
+BEGIN {
+  $lineno = 1
+}
+
+$_ = "%5d %s" % [$lineno, $_]
+$lineno += 1
