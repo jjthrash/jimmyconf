@@ -5,7 +5,6 @@ function dangling_commits {
 }
 
 for commit in `dangling_commits`; do
-    echo $commit
-    git cat-file -p $commit
+    git show $* $commit
     echo
 done
