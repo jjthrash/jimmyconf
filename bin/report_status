@@ -31,7 +31,7 @@ def hours(project, after = nil, before = nil)
 end
 
 def weeks_back(count)
-  previous_sunday(Date.today - 7)
+  previous_sunday(Date.today - 7*(count+1))
 end
 
 def previous_sunday(date)
@@ -54,18 +54,23 @@ def current_branch
   branch_list.find {|s| s =~ /^\* / }[2..-1]
 end
 
-def branch_statuslog(branch, date)
+def branch_statuslog(branch, date_from, date_to = nil)
+  date_to ||= date_from + 7
   old_branch = current_branch
   `git checkout #{branch} > /dev/null 2> /dev/null`
-  result =`statuslog #{date}`
+  result =`statuslog #{date_from} #{date_to}`
   `git checkout #{old_branch} > /dev/null 2> /dev/null`
   result.chomp.split("\n")
 end
 
-def statuslog
+def statuslog(start_date)
   branches.map { |branch|
-    branch_statuslog(branch, weeks_back(0))
+    branch_statuslog(branch, start_date)
   }.flatten.uniq
+end
+
+def hours_for_week_starting(project, start_date)
+  hours(project, start_date, previous_sunday(start_date + 7))
 end
 
 if __FILE__ == $0
@@ -88,16 +93,18 @@ if __FILE__ == $0
 
   options_parser.parse!
 
-  if ARGV[0]
+  project = ARGV[0]
+
+  if project
     start_date = weeks_back(options[:number])
     if options[:time]
-      puts "Last week I spent %.2f hours doing the following:" % [hours(ARGV[0], start_date, previous_sunday(start_date + 7)).to_s]
+      puts "Last week I spent %.2f hours doing the following:" % [hours_for_week_starting(project, start_date).to_s]
     else
       puts "Last week I did the following:"
     end
-    puts statuslog.join("\n")
+    puts statuslog(start_date).join("\n")
   else
-    puts options_parser
+    $stderr.puts options_parser
   end
 end
 

@@ -1,3 +1,9 @@
 #!/bin/bash
 
-git log --no-decorate --author=jimmy --pretty=oneline --after=$1 | cut -d' ' -f2- | sed -e 's/^/* /'
+before_clause=''
+
+if [ "z$2" != "z" ]; then
+  before_clause="--before=$2"
+fi
+
+git log --author=jimmy --pretty=format:"* %s" --after=$1 $before_clause
