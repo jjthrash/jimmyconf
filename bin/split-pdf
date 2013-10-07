@@ -1,0 +1,4 @@
+#!/bin/sh
+
+NAME=`basename $1 .pdf`
+convert $1 $NAME%d.jpg
