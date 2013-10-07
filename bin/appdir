@@ -1,0 +1,20 @@
+#!/bin/bash
+
+app_dir=$1
+ver=$2
+
+if [ "0$app_dir" = "0" ]; then
+  echo
+  echo Usage:
+  echo "    $0 <app_dir> [<iOS version dir>]"
+  echo Specify the app directory name, e.g. Skitch.app
+  echo
+  exit 1
+fi
+
+if [ "0$ver" = "0" ]; then
+  ver=7.0
+fi
+
+result=`find ~/Library/Application\ Support/iPhone\ Simulator/$ver -type d -name "$app_dir"`
+echo `dirname "$result"`
