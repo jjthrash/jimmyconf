@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+
+def generate_html(list)
+  puts <<-HTML
+<html>
+<body>
+<ul>
+  HTML
+
+  list.each do |path|
+    puts %Q{<li><a href="#{path}">#{path}</a></li>}
+  end
+
+  puts <<-HTML
+</ul>
+</body>
+</html>
+  HTML
+end
+
+def make_file_list(wildcard)
+  list = Dir.glob(wildcard).select { |path|
+    File.file?(path)
+  }
+
+  puts generate_html(list)
+end
+
+if __FILE__ == $0
+  make_file_list(ARGV[0] || '*')
+end
