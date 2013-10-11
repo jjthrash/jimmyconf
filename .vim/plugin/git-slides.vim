@@ -1,0 +1,1 @@
+../../git-slides/vim/plugin/git-slides.vim
