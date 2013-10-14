@@ -19,15 +19,25 @@ def round(x)
   (x * 100.0).round / 100.0
 end
 
-def hours(project, after = nil, before = nil)
+def time_entries(project, after = nil, before = nil)
   opts = {:project_id => projects[project]['freshbooks_id']}
   opts[:date_from] = after if after
   opts[:date_to]   = before if before
   list = client.time_entry.list(opts)["time_entries"]["time_entry"]
   list = [list] unless list.kind_of?(Array)
+  list
+end
+
+def hours(project, after = nil, before = nil)
+  ignored = projects[project]['ignored_task_ids'] || []
+  list = time_entries(project, after, before)
   list.map {|te|
-    te['hours'].to_f
-  }.inject(0) {|a,b| a+b}
+    if ignored.index(te['task_id'].to_i)
+      0
+    else
+      te['hours'].to_f
+    end
+  }.inject(&:+)
 end
 
 def weeks_back(count)
