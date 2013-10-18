@@ -83,7 +83,17 @@ def hours_for_week_starting(project, start_date)
   hours(project, start_date, previous_sunday(start_date + 7))
 end
 
+def repo_dirty?
+  system('git anything-changed')
+  !$?.success?
+end
+
 if __FILE__ == $0
+  if repo_dirty?
+    puts "The working copy is dirty. Please stash changes before running"
+    exit 1
+  end
+
   require 'optparse'
 
   options = {
