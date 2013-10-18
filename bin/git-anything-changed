@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+
+exit `git status --porcelain`.lines.reject {|line| line.start_with?('??') }.count
