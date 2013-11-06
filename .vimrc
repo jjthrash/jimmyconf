@@ -1,15 +1,17 @@
 call pathogen#infect()
 
 "{{{ Stuff specifically for GUI-mode...
-if &t_Co > 2 || has("gui_running")
-  syntax on
-  set guifont=Consolas:h12
-  set ch=1
-  set winaltkeys=yes
-  set background=dark
-  set mousehide
-  colors solarized
-endif
+syntax on
+set guifont=Consolas:h12
+set background=dark
+set mousehide
+"}}}
+
+"{{{ Color scheme and syntax highlignting
+set term=xterm-256color
+let g:solarized_termcolors=256
+let g:solarized_termtrans=1
+colors solarized
 "}}}
 
 "{{{ General settings...
