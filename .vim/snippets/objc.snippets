@@ -33,6 +33,11 @@ snippet int
 	}
 	${4}
 	@end
+# Private category
+snippet pint
+	@interface ${1:`Filename('', 'someClass')`} ()
+	${2}
+	@end
 # Class Implementation
 snippet impl
 	@implementation ${1:`Filename('', 'someClass')`}
@@ -139,6 +144,14 @@ snippet forarray
 		${3:id} $1 = [$2 $1AtIndex:index];
 		${4}
 	}
+snippet switch
+	switch (${1}) {
+	case ${2}:
+		${3}
+		break;
+	default:
+		break;
+	}
 # IBOutlet
 # @property (Objective-C 2.0)
 snippet prop
@@ -175,7 +188,7 @@ snippet except
 							   userInfo:nil];
 	[$1 raise];
 snippet prag
-	#pragma mark ${1:foo}
+	#pragma ${1:mark} ${2:foo}
 snippet cl
 	@class ${1:Foo};${2}
 snippet color
