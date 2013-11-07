@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 class Namer
-  METASYNTACTIC_VARIABLES = %w(Bob Fred Sue George Henry Horatio Sally Sarah Rosie Chip Daisy)
+  METASYNTACTIC_VARIABLES = File.readlines("/usr/share/dict/propernames").map(&:chomp).shuffle
   ADDR_REGEX = /0x[0-9a-f]{7,8}/
 
   def build_replacement_map(text)
