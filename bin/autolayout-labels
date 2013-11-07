@@ -4,22 +4,18 @@ class Namer
   METASYNTACTIC_VARIABLES = %w(Bob Fred Sue George Henry Horatio Sally Sarah Rosie Chip Daisy)
   ADDR_REGEX = /0x[0-9a-f]{7,8}/
 
-  def initialize
-    @metasyntactic_variables = METASYNTACTIC_VARIABLES
-  end
-
-  def next_metasyntactic_variable
-    @metasyntactic_variables.pop
-  end
-
   def build_replacement_map(text)
     text.
       gsub(/NSLayoutConstraint:#{ADDR_REGEX}/, '').
       scan(ADDR_REGEX).
-      inject({}) {|h, match|
-        h[match] ||= next_metasyntactic_variable
-        h
-      }
+      inject([{}, METASYNTACTIC_VARIABLES]) {|(h, msv), match|
+        if h[match]
+          [h, msv]
+        else
+          h[match] = msv[-1]
+          [h, msv[0..-2]]
+        end
+      }[0]
   end
 
   def label_constraint_list(text)
