@@ -139,9 +139,13 @@ nmap         ++  vip++
 map <leader>pr yyp<<I@property (nonatomic, retain) <ESC>
 map <leader>pa yyp<<I@property (nonatomic, assign) <ESC>
 map <leader>ps yyp<<I@property (nonatomic, strong) <ESC>
-map <leader>pw yyp<<I@property (nonatomic, weak) <ESC>
+map <leader>pw yyp<<I@property (nonatomic, weak)   <ESC>
+map <leader>pc yyp<<I@property (nonatomic, copy)   <ESC>
+map <leader>po yyp<<I@property (nonatomic, readonly) <ESC>
 map <leader>eh :e %<BS>h<CR>
 map <leader>em :e %<BS>m<CR>
+map <leader>lg yyp:s/"/\\"/ge<CR>INSLog(@"<ESC>A");<ESC>:nohlsearch<CR>
+nmap <leader>__ i_<ESC>l~
 "}}}
 
 "{{{ NERDTree config
