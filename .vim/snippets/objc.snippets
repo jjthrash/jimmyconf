@@ -225,3 +225,17 @@ snippet ios7
 	floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1
 snippet ios6
 	floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1
+snippet kvo
+	for (NSString *keyPath in [self observedKeyPaths]) {
+		[self addObserver:self forKeyPath:keyPath options:0 context:NULL];
+	}
+	
+	- (void)dealloc {
+		for (NSString *keyPath in [self observedKeyPaths]) {
+			[self removeObserver:self forKeyPath:keyPath];
+		}
+	}
+	
+	- (NSArray*)observedKeyPaths {
+		return @[@"${1}"${2}];
+	}
