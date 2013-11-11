@@ -118,6 +118,11 @@ map Y y$
 vmap <leader>dc !dc<CR>
 nmap <leader>dc V!dc<CR>
 nmap <leader>xml :%!xmllint --format -<CR>:set ft=xml<CR>
+nmap <leader>rs :s/\s\+$//<CR>:noh<CR>
+map <leader>rs :%s/\s\+$//<CR>:noh<CR>
+vmap <leader>rs :s/\s\+$//<CR>:noh<CR>
+map <leader>rt :retab<CR>
+nmap <leader>q :nohlsearch<CR>
 
 " dragvisuals.vim
 vmap  <expr>  <LEFT>   DVB_Drag('left')
