@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+if [ $# -ne 1 ]; then
+  echo Booyah
+  exit 1
+fi
+
+git merge --no-ff $1
+git branch -d $1
