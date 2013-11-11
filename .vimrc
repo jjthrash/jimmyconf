@@ -246,4 +246,8 @@ let g:ctrlp_custom_ignore = {
 let g:ackprg = 'ag -i --nogroup --nocolor --column'
 "}}}
 
+"{{{ vim-powerline config
+"set fillchars+=stl:\ ,stlnc:\
+"}}}
+
 " vim:foldmethod=marker
