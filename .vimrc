@@ -95,11 +95,6 @@ digraph Ux 221
 digraph ux 253
 "}}}
 
-"{{{ Plugin maps
-map <silent> <S-TAB> :NERDTreeToggle<CR>
-map <silent> <TAB> :call BufferList()<CR>
-"}}}
-
 "{{{ Maps
 map <leader>un yyp:s/./-/g:nohlsearch
 map <F1> <ESC> " ThinkPad keyboard with poorly placed Esc key
@@ -151,6 +146,7 @@ nmap <leader>__ i_<ESC>l~
 "}}}
 
 "{{{ NERDTree config
+map <silent> <S-TAB> :NERDTreeToggle<CR>
 let NERDTreeChDirMode=2 " CWD changes with root of NERDTree
 let NERDTreeMinimalUI=1
 map <leader>n :NERDTreeFind<CR>
