@@ -236,4 +236,10 @@ augroup plist
 augroup END
 "}}}
 
+"{{{ ctrlp config
+let g:ctrlp_custom_ignore = {
+    \ 'dir': '(vendor|out)'
+    \ }
+"}}}
+
 " vim:foldmethod=marker
