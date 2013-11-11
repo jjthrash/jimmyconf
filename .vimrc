@@ -242,4 +242,8 @@ let g:ctrlp_custom_ignore = {
     \ }
 "}}}
 
+"{{{ Ack.vim config
+let g:ackprg = 'ag -i --nogroup --nocolor --column'
+"}}}
+
 " vim:foldmethod=marker
