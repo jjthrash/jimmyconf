@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+
+def story(id)
+  system("pivotal_tools show story #{id}")
+end
+
+def stories(userid = 'JT')
+  system("pivotal_tools show stories --for=#{userid}")
+end
+
+def create(type, summary, description)
+  system("pivotal_tools", "create", type, summary, description)
+end
+
+def update_story(command, *args)
+  system("pivotal_tools", command, "story", *args)
+end
+
+def dispatch(all_args)
+  command, args = all_args
+  case command
+  when 'stories'
+    stories(*args)
+
+  when 'story'
+    story(*args)
+
+  when 'create'
+    create(*args)
+
+  when 'start', 'finish'
+    update_story(command, *args)
+
+  end
+end
+
+if __FILE__ == $0
+  dispatch(ARGV)
+end
