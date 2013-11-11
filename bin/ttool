@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+def current_pane_dims
+  lines = `tmux list-panes`.lines
+  line = lines.select {|l| l.index '(active)'}[0]
+  dims = /\[([0-9x]+)\]/.match(line)[1]
+  dims.split('x').map(&:to_i)
+end
+
+def trim_to_pane
+  w, h = current_pane_dims
+  $stdin.each_line.take(h).each do |line|
+    puts line.chomp[0,w]
+  end
+end
+
+def dispatch(args)
+  case args[0]
+  when 'current-pane-dims'
+    puts current_pane_dims.join(",")
+  when 'trim-to-pane', 'trim'
+    trim_to_pane
+  end
+end
+
+if __FILE__ == $0
+  dispatch(ARGV)
+end
