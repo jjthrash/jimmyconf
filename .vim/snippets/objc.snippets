@@ -239,3 +239,11 @@ snippet kvo
 	- (NSArray*)observedKeyPaths {
 		return @[@"${1}"${2}];
 	}
+snippet delegate
+	@protocol ${1:`Filename()`Delegate};
+	
+	@property (nonatomic, weak)  id<$1> delegate;
+	
+	@protocol $1 <NSObject>
+	${2}
+	@end
