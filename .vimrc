@@ -78,6 +78,7 @@ if has("autocmd")
 
   autocmd FileType objc set sts=4 sw=4 ts=4 et
   autocmd FileType clojure set sts=2 sw=2 ts=2 et
+  let g:c_syntax_for_h = 1
 endif
 "}}}
 
