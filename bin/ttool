@@ -7,10 +7,10 @@ def current_pane_dims
   dims.split('x').map(&:to_i)
 end
 
-def trim_to_pane
+def trim_to_pane(in_io, out_io)
   w, h = current_pane_dims
-  $stdin.each_line.take(h).each do |line|
-    puts line.chomp[0,w]
+  in_io.each_line.take(h).each do |line|
+    out_io.puts line.chomp[0,w]
   end
 end
 
@@ -19,7 +19,7 @@ def dispatch(args)
   when 'current-pane-dims'
     puts current_pane_dims.join(",")
   when 'trim-to-pane', 'trim'
-    trim_to_pane
+    trim_to_pane($stdin, $stdout)
   end
 end
 
