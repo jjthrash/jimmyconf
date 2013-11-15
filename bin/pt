@@ -16,6 +16,10 @@ def update_story(command, *args)
   system("pivotal_tools", command, "story", *args)
 end
 
+def passthrough_command(*args)
+  system("pivotal_tools", *args)
+end
+
 def dispatch(all_args)
   command, args = all_args
   case command
@@ -28,8 +32,14 @@ def dispatch(all_args)
   when 'create'
     create(*args)
 
-  when 'start', 'finish'
+  when 'start', 'finish', 'deliver', 'accept', 'reject'
     update_story(command, *args)
+
+  when 'open'
+    passthrough_command(*all_args)
+
+  else
+    raise "unsupported command"
 
   end
 end
