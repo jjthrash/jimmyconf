@@ -166,6 +166,8 @@ module Report
         project_rate =
           if projects[project] && projects[project]['rate_type'] != 'daily'
             projects[project]['rate'] || DEFAULT_RATE
+          elsif projects[project] && Array.wrap(projects[project]['hourly_task_ids']).index(entry['task_id'].to_i)
+            projects[project]['hourly_rate'] || DEFAULT_RATE
           else
             0.0
           end
@@ -190,7 +192,8 @@ module Report
     date_to_project =
       times(weeks_ago).inject({}) do |h, entry|
         project = project_name_for_freshbooks_id(entry['project_id']) || 'unknown'
-        if projects[project] && projects[project]['rate_type'] == 'daily'
+        if projects[project] && projects[project]['rate_type'] == 'daily' &&
+            !Array.wrap(projects[project]['hourly_task_ids']).index(entry['task_id'].to_i)
           h[entry['date']] = project
         end
 
