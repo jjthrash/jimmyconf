@@ -6,7 +6,7 @@ snippet imp
 	#import "${1:`Filename()`.h}"${2}
 # @selector(...)
 snippet sel
-	@selector(${1:method})${3}
+	@selector(${1:method})${2}
 # @"..." string
 snippet s
 	@"${1}"${2}
@@ -111,7 +111,6 @@ snippet M
 snippet sm
 	- (${1:id})${2:method} {
 		[super $2];${3}
-		return self;
 	}
 # Method: Initialize
 snippet I
@@ -247,3 +246,9 @@ snippet delegate
 	@protocol $1 <NSObject>
 	${2}
 	@end
+snippet prepare
+	- (void)prepareForSegue:(UIStoryboardSegue*)segue sender:(id)sender {
+		if ([segue.identifier isEqualToString:@"${1}"]) {
+			${2}
+		}
+	}
