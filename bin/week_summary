@@ -329,7 +329,9 @@ module Report
     if 6 == Date.today.wday
       io.puts "Avg catchup required over next 3 weeks: #{report['required_over_next_three_weeks']}"
     else
-      io.puts "Avg catchup target required for next 3 weeks: #{report['weekly_required_for_avg']} (#{round(week_report['dollars'] / report['weekly_required_for_avg'])*100}% complete)"
+      io.puts "Avg catchup target required for next 3 weeks: %d (%d%% complete)" %
+                [report['weekly_required_for_avg'],
+                 round(week_report['dollars'] / report['weekly_required_for_avg'])*100]
     end
 
     io.puts ""
