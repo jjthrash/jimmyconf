@@ -265,12 +265,21 @@ module Report
     total_today / time_since_bod
   end
 
+  def plus_for_positive(x)
+    if x > 0
+      "+#{x}"
+    else
+      x.to_s
+    end
+  end
+
   def report_porcelain(weeks_ago)
     {
       'today_hours'                    => round(total_today, 2),
       'today_rate'                     => round(today_rate*100, 2),
+      'today_surplus_minutes'          => round(time_since_bod * 60 * (today_rate - 0.8), 0),
       'today_remaining_til_eod'        => round(time_til_eod, 2),
-      'today_possible'                 => round(total_today + [0.0, time_til_eod].min, 2),
+      'today_possible'                 => round(total_today + [0.0, time_til_eod].max, 2),
       'week_report'                    => week_report_porcelain(weeks_ago),
       'required_over_next_three_weeks' => round(required_weekly_revenue_over_next_weeks(10, 3), 2),
       'required_over_next_two_weeks'   => round(required_weekly_revenue_over_next_weeks(10, 2), 2),
@@ -285,10 +294,12 @@ module Report
     io.puts "Week ending #{sunday_after(Date.today - 7*weeks_ago) - 1}"
     # how far am I today
     io.puts "------"
-    io.puts "Today: %.2f, %.2f left until 17:00 (%.2f possible today, rate so far is %.2f%%)" % [report['today_hours'],
-                                                                                                 report['today_remaining_til_eod'],
-                                                                                                 report['today_possible'],
-                                                                                                 report['today_rate']]
+    io.puts "Today: %.2f @ %.2f%% (%s min), %.2f left until 17:00 (%.2f possible today)" %
+              [report['today_hours'],
+               report['today_rate'],
+               plus_for_positive(report['today_surplus_minutes'].to_i),
+               report['today_remaining_til_eod'],
+               report['today_possible']]
     io.puts ""
 
     # how far am I this week
