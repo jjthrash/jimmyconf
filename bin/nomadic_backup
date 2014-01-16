@@ -1,27 +1,14 @@
 #!/bin/bash
 
 BASE=/Volumes/Nomad\ Backup
+BACKUP="nice rsync -av --delete"
 
 if [ -d "$BASE" ]; then
 
-    if [ ! -f "$BASE"/PID ]; then
+    $BACKUP $HOME/Archive            "$BASE"/Backup
+    $BACKUP $HOME/Documents          "$BASE"/Backup
+    $BACKUP $HOME/Library/Containers "$BASE"/Backup
 
-        echo $$ > "$BASE"/PID
-
-        rsync -av \
-              $HOME/Archive   \
-              $HOME/Documents \
-              $HOME/Code \
-              "$BASE"/Backup
-
-        echo last backup: `date` > "$BASE"/LAST_BACKUP
-
-        rm "$BASE"/PID
-
-    else
-
-        echo Backup process is already running or pidfile needs to be deleted
-
-    fi
+    echo Last backup: `date` > "$BASE"/LAST_BACKUP
 
 fi
