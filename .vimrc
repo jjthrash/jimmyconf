@@ -26,11 +26,11 @@ set showbreak=..
 set nobackup
 set viminfo='20,\"50,n$HOME/.viminfo
 set ruler
-set tabstop=4
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
 set showmatch
-set shiftwidth=4
 set expandtab
-set softtabstop=4
 set visualbell t_vb=
 set smartcase
 set ignorecase
