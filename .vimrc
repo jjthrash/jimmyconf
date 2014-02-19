@@ -125,6 +125,7 @@ map <leader>rs :%s/\s\+$//<CR>:noh<CR>
 vmap <leader>rs :s/\s\+$//<CR>:noh<CR>
 map <leader>rt :retab<CR>
 nmap <leader>q :nohlsearch<CR>
+nmap <leader>c* :let @* = @"<CR>
 
 " dragvisuals.vim
 vmap  <expr>  <LEFT>   DVB_Drag('left')
