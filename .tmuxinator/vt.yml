@@ -1,0 +1,24 @@
+# ~/.tmuxinator/safetycheck.yml
+
+name: vt
+root: ~/Code/ad_submitter
+
+# Optional tmux socket
+# socket_name: foo
+
+# Runs before everything. Use it to start daemons etc.
+# pre: sudo /etc/rc.d/mysqld start
+
+# Runs in each window and pane before window/pane specific commands. Useful for setting up interpreter versions.
+# pre_window: rbenv shell 2.0.0-p247
+
+# Pass command line options to tmux. Useful for specifying a different tmux.conf.
+# tmux_options: -f ~/.tmux.mac.conf
+
+windows:
+  - editor:
+      layout: 04ed,278x73,0,0{174x73,0,0,7,103x73,175,0[103x21,175,0,11,103x51,175,22,26]}
+      panes:
+        - vim
+        -
+        -
