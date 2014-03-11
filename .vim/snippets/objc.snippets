@@ -44,9 +44,8 @@ snippet impl
 	${2}
 	@end
 snippet init
-	- (id)init {
-		if (self = [super init]) {
-			${1}
+	- (id)init${1} {
+		if (self = [super init${2:$1}]) {
 		};
 		return self;
 	}
@@ -104,8 +103,8 @@ snippet wake
 	}
 # Class Method
 snippet M
-	+ (${1:id})${2:method} {${3}
-		return nil;
+	+ (${1:id})${2:method} {
+		${3}
 	}
 # Sub-method (Call super)
 snippet sm
@@ -163,7 +162,7 @@ snippet dyn
 	@dynamic ${1:property};${2}
 # [[ alloc] init]
 snippet alloc
-	[[${1:foo} alloc] init${2}];${3}
+	[[${1:foo} alloc] init${2}]${3}
 # retain
 snippet ret
 	[${1:foo} retain];${2}
