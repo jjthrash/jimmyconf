@@ -1,3 +1,0 @@
-#!/bin/bash
-
-reattach-to-user-namespace /usr/local/bin/vim $*
