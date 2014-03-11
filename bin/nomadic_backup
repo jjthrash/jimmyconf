@@ -1,13 +1,14 @@
 #!/bin/bash
 
-BASE=/Volumes/Nomad\ Backup
+BASE=/Volumes/Nomadic\ Backup
 BACKUP="nice rsync -av --delete"
 
 if [ -d "$BASE" ]; then
 
-    $BACKUP $HOME/Archive            "$BASE"/Backup
-    $BACKUP $HOME/Documents          "$BASE"/Backup
-    $BACKUP $HOME/Library/Containers "$BASE"/Backup
+    $BACKUP $HOME/Archive            \
+            $HOME/Documents          \
+            $HOME/Library/Containers \
+              "$BASE"/Backup
 
     echo Last backup: `date` > "$BASE"/LAST_BACKUP
 
