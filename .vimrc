@@ -139,7 +139,7 @@ vmap <expr>  ++  VMATH_YankAndAnalyse()
 nmap         ++  vip++                 
 "}}}
 
-"{{{ Obj-C maps
+"{{{ Objective-C
 map <leader>pr yyp<<I@property (nonatomic, retain) <ESC>
 map <leader>pa yyp<<I@property (nonatomic, assign) <ESC>
 map <leader>ps yyp<<I@property (nonatomic, strong) <ESC>
@@ -150,6 +150,11 @@ map <leader>eh :e %<BS>h<CR>
 map <leader>em :e %<BS>m<CR>
 map <leader>lg yyp:s/"/\\"/ge<CR>INSLog(@"<ESC>A");<ESC>:nohlsearch<CR>
 nmap <leader>__ i_<ESC>l~
+
+map <unique> <SID>AWS <Plug>AlignMapsWrapperStart
+map <unique> <SID>AWE <Plug>AlignMapsWrapperEnd
+
+map <leader>a: <SID>AWS:AlignPush<CR>:AlignCtrl Irp0lP0<CR>:'y,'zAlign :<CR>:AlignPop<CR><SID>AWE
 "}}}
 
 "{{{ NERDTree config
