@@ -45,5 +45,10 @@ def dispatch(all_args)
 end
 
 if __FILE__ == $0
+  if ARGV.count == 0
+    puts "available commands: stories, story, create, start, finish, deliver, accept, reject, open"
+    exit 1
+  end
+
   dispatch(ARGV)
 end
