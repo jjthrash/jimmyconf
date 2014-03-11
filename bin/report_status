@@ -3,7 +3,6 @@
 require 'rubygems'
 require 'date'
 require 'yaml'
-load File.join(File.dirname(__FILE__), 't2d')
 
 def client
   gem 'ruby-freshbooks'
