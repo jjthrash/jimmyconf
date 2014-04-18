@@ -274,22 +274,6 @@ module Report
     end
   end
 
-  def surplus
-    round(time_since_bod * 60 * (today_rate - 0.8), 0)
-  end
-
-  def catchup
-    round((0.8*time_since_bod - total_today)/0.2 * 60, 0)
-  end
-
-  def surplus_or_catchup
-    if surplus >= 0
-      "#{surplus.to_i} minute surplus"
-    else
-      "#{catchup.to_i} minute catchup"
-    end
-  end
-
   def eod_forecast
     Time.now + 60 * 60 * (6.0 - total_today)
   end
@@ -298,7 +282,6 @@ module Report
     {
       'today_hours'                    => round(total_today, 2),
       'today_rate'                     => round(today_rate*100, 2),
-      'today_surplus_or_catchup'       => surplus_or_catchup,
       'eod_forecast'                   => eod_forecast.strftime("%H:%M"),
       'today_remaining_til_eod'        => round(time_til_eod, 2),
       'today_possible'                 => round(total_today + [0.0, time_til_eod].max, 2),
@@ -319,10 +302,9 @@ module Report
     io.puts "Week ending #{sunday_after(Date.today - 7*weeks_ago) - 1}"
     # how far am I today
     io.puts "------"
-    io.puts "Today: %.2f @ %.2f%% (%s), EOD forecast: %s" %
+    io.puts "Today: %.2f @ %.2f%% EOD %s" %
               [report['today_hours'],
                report['today_rate'],
-               report['today_surplus_or_catchup'],
                report['eod_forecast']]
     io.puts ""
 
