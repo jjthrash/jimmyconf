@@ -1,0 +1,28 @@
+map global normal <c-f> <pagedown>
+map global normal <c-b> <pageup>
+#map global normal <c-e> vj
+#map global normal <c-y> vk
+
+map global insert <c-w> %{ <esc> <a-a>wd<space>a }
+
+hook global WinCreate .* %{
+    addhl regex \h+$ 0:red,red
+    set buffer expandtab true
+}
+
+hook global WinSetOption filetype=objc %[
+    def ocalign %{ exec s\S+?:<ret>& }
+    def ocpa %{ exec <a-x><a-s>i@property<space>(nonatomic,<space>assign) <space><esc> }
+    def ocpr %{ exec <a-x><a-s>i@property<space>(nonatomic,<space>retain)  <space><esc> }
+    def ocps %{ exec <a-x><a-s>i@property<space>(nonatomic,<space>strong)  <space><esc> }
+    def ocpw %{ exec <a-x><a-s>i@property<space>(nonatomic,<space>weak)    <space><esc> }
+    def ocpc %{ exec <a-x><a-s>i@property<space>(nonatomic,<space>copy)    <space><esc> }
+    def ocpo %{ exec <a-x><a-s>i@property<space>(nonatomic,<space>readonly)<space><esc> }
+    def oclg %{ exec XypjXs"<ret>i\<esc>INSLog(@"<esc>A");<esc> }
+]
+
+map global normal <a-o> %{ :menu pa 'oc-pa' pr 'oc-pr' ps 'oc-ps' pw 'oc-pw' pc 'oc-pc' po 'oc-po'<ret> }
+
+set global tabstop 4
+set global indentwidth 4
+set global autoreload yes
