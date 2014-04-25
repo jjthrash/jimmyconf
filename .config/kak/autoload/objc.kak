@@ -17,8 +17,9 @@ addhl -def-group objc regex "\<(const|mutable|auto|namespace|inline|static|volat
 addhl -def-group objc regex "\<(self|nil|id|super)\>" 0:value
 addhl -def-group objc regex "@(\d+|NO|YES|TRUE|FALSE)\>" 0:value
 addhl -def-group objc regex "\<(instancetype)\>" 0:type
-addhl -def-group objc regex "\<(NSInteger|NSUInteger|CGFloat|NSString)\>" 0:type
+addhl -def-group objc regex "\<(BOOL|NSInteger|NSUInteger|CGFloat|NSString)\>" 0:type
 addhl -def-group objc regex "\<(nonatomic|assign|copy|strong|retain|weak|readonly)\>" 0:attribute
+addhl -def-group objc regex "\<(__block)\>" 0:attribute
 addhl -def-group objc regex "@(property|interface|implementation|protocol|end|selector|autoreleasepool|try|catch)\>" 0:attribute
 addhl -def-group objc regex "\<(IBAction|IBOutlet)\>" 0:attribute
 
