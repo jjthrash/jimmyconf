@@ -26,3 +26,13 @@ map global normal <a-o> %{ :menu pa 'oc-pa' pr 'oc-pr' ps 'oc-ps' pw 'oc-pw' pc 
 set global tabstop 4
 set global indentwidth 4
 set global autoreload yes
+
+decl str bg
+
+hook global WinSetOption bg=dark %[
+    colalias PrimaryCursor white,black
+]
+
+hook global WinSetOption bg=light %[
+    colalias PrimaryCursor white,black
+]
