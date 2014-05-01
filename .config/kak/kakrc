@@ -28,6 +28,7 @@ map global normal <a-o> %{ :menu pa 'oc-pa' pr 'oc-pr' ps 'oc-ps' pw 'oc-pw' pc 
 set global tabstop 4
 set global indentwidth 4
 set global autoreload yes
+set global autoshowcompl false
 
 decl str bg
 
