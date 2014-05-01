@@ -19,6 +19,8 @@ hook global WinSetOption filetype=objc %[
     def ocpc %{ exec <a-x><a-s>i@property<space>(nonatomic,<space>copy)    <space><esc> }
     def ocpo %{ exec <a-x><a-s>i@property<space>(nonatomic,<space>readonly)<space><esc> }
     def oclg %{ exec %{XypjXiNSLog(@"<esc>a");<esc>X} }
+
+    def comment %[ exec |comment_uncomment<space>//<ret> ]
 ]
 
 map global normal <a-o> %{ :menu pa 'oc-pa' pr 'oc-pr' ps 'oc-ps' pw 'oc-pw' pc 'oc-pc' po 'oc-po'<ret> }
