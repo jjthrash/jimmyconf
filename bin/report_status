@@ -66,9 +66,7 @@ end
 def branch_statuslog(branch, date_from, date_to = nil)
   date_to ||= date_from + 7
   old_branch = current_branch
-  `git checkout #{branch} > /dev/null 2> /dev/null`
-  result =`statuslog #{date_from} #{date_to}`
-  `git checkout #{old_branch} > /dev/null 2> /dev/null`
+  result =`statuslog #{date_from} #{date_to} #{branch}`
   result.chomp.split("\n")
 end
 

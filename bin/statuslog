@@ -6,4 +6,4 @@ if [ "z$2" != "z" ]; then
   before_clause="--before=$2"
 fi
 
-git log --author=jimmy --pretty=format:"* %s" --after=$1 $before_clause
+git log --author=jimmy --pretty=format:"* %s" --after=$1 $before_clause $3
