@@ -1,41 +1,148 @@
+face Search black,yellow
+
 map global normal <c-f> <pagedown>
 map global normal <c-b> <pageup>
 #map global normal <c-e> vj
 #map global normal <c-y> vk
 
-map global insert <c-w> %{ <esc> <a-a>wd<space>a }
+#map global insert <c-w> %{ <esc> <a-a>wd<space>a }
+
+#hook global BufOpen .*/?[^*].+ %{
+#    %sh{
+#        tools=(
+#            ## cursor coordinates in the buffer
+#            "%val{cursor_line}:%val{cursor_char_column}"
+#            ## filetype of the buffer detected by kak
+#            "%opt{filetype}"
+#            ## current git branch, or <none>
+#            "%sh{branch=\$(cd \$(dirname \${kak_bufname}) && git rev-parse --abbrev-ref HEAD 2>/dev/null); test ! -z \"\${branch}\" && echo \"└\${branch}\"}"
+#        )
+#        fmt_line=""
+#
+#        for t in "${tools[@]}"; do
+#            test -z "${t}" && continue
+#            test ! -z "${fmt_line}" && fmt_line="${t} ${fmt_line}" || fmt_line="${t}"
+#        done
+#
+#        echo set global modelinefmt "'${fmt_line}'"
+#    }
+#}
+
+def -allow-override fe %{
+  eval %{
+        %sh{
+            result=$( find . -type f \( \! -path "*.git/*" \) -and \( \! -path ".*sw?" \) | fzf-tmux )
+            if [ $? ]; then
+              echo e $result
+            else
+              echo echo Cancelled
+            fi
+          }
+        }
+}
+
+def -allow-override fb %{
+  eval %{b %sh{ ( echo $kak_buflist|sed -n 1'p'| tr ':' '\n' | fzf-tmux )}}
+}
+
+def gq %{ exec |fold<space>-s<space>-w75<ret><a-s>s\h+$<ret>d }
+def ruby %{ eval set buffer filetype ruby }
+def objc %{ eval set buffer filetype objc }
+def js %{ eval set buffer filetype javascript }
+def swift %{ eval set buffer filetype swift }
 
 hook global WinCreate .* %{
+    addhl number_lines
     addhl regex \h+$ 0:red,red
     set buffer expandtab true
+    addhl dynregex '$reg{/}' 0:Search
+}
+
+# This goes here, because my file cmd has been hacked to support objc
+hook global BufSetOption mimetype=text/x-objc %{
+    set buffer filetype objc
 }
 
 hook global WinSetOption filetype=objc %[
-    def ocalign %{ exec s\S+?:<ret>& }
+    rmhooks window c-family-indent
+    rmhooks window c-family-hooks
+
+    set buffer tabstop 4
+    set buffer indentwidth 4
+
+    def ocsv %{ exec s\S+?:<ret> }
     def ocpa %{ exec <a-x><a-s>i@property<space>(nonatomic,<space>assign) <space><esc> }
     def ocpr %{ exec <a-x><a-s>i@property<space>(nonatomic,<space>retain)  <space><esc> }
     def ocps %{ exec <a-x><a-s>i@property<space>(nonatomic,<space>strong)  <space><esc> }
     def ocpw %{ exec <a-x><a-s>i@property<space>(nonatomic,<space>weak)    <space><esc> }
     def ocpc %{ exec <a-x><a-s>i@property<space>(nonatomic,<space>copy)    <space><esc> }
     def ocpo %{ exec <a-x><a-s>i@property<space>(nonatomic,<space>readonly)<space><esc> }
-    def oclg %{ exec %{XypjXiNSLog(@"<esc>a");<esc>X} }
+    def oclg %{ exec %{XypjXs"<ret>i\<esc>XiNSLog(@"<esc>a");<esc>X} }
+    def ocav %{ exec <a-|>objc-av<ret> }
+
+  def -allow-override objc-del %{ exec %{ |objc-del<space> }
+                                       %sh{ basename ${kak_bufname} ".h" }
+                                       %{ <ret> }}
+  def -allow-override objc-pint %{ exec %{ |objc-pint<space> }
+                                        %sh{ basename ${kak_bufname} ".m" }
+                                        %{ <ret> }}
 
     def comment %[ exec |comment_uncomment<space>//<ret> ]
+    #map normal <c-c> %{eval comment<ret>}
+    addhl show_matching
+    addhl flag_lines
 ]
 
-map global normal <a-o> %{ :menu pa 'oc-pa' pr 'oc-pr' ps 'oc-ps' pw 'oc-pw' pc 'oc-pc' po 'oc-po'<ret> }
+hook global WinSetOption filetype=rust %[
+    set buffer tabstop 2
+    set buffer indentwidth 2
 
-set global tabstop 4
-set global indentwidth 4
+    rmhooks window rust-indent
+    rmhooks window rust-hooks
+]
+
+hook global WinSetOption filetype=ruby %[
+    set buffer tabstop 2
+    set buffer indentwidth 2
+    rmhooks window ruby-indent
+    rmhooks window ruby-hooks
+
+    def comment %[ exec |comment_uncomment<space>'#'<ret> ]
+]
+
+hook global WinSetOption filetype=clojure %[
+    rmhooks window clojure-indent
+    rmhooks window lisp-indent
+    set buffer tabstop 2
+    set buffer indentwidth 2
+]
+
+hook global WinSetOption filetype=javascript %[
+    def comment %[ exec |comment_uncomment<space>//<ret> ]
+    rmhooks window javascript-indent
+    rmhooks window javascript-hooks
+]
+
+hook global WinSetOption filetype=html %[
+    rmhooks window html-indent
+    rmhooks window html-hooks
+]
+
+hook global WinSetOption filetype=swift %[
+    set buffer tabstop 2
+    set buffer indentwidth 2
+]
+
+set global tabstop 2
+set global indentwidth 2
 set global autoreload yes
-set global autoshowcompl false
+#set global autoshowcompl false
 
 decl str bg
-
 hook global WinSetOption bg=dark %[
-    colalias PrimaryCursor white,black
+    face PrimaryCursor black,white
 ]
 
 hook global WinSetOption bg=light %[
-    colalias PrimaryCursor white,black
+    face PrimaryCursor white,black
 ]

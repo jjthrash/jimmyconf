@@ -1,5 +1,10 @@
-decl bool expandtab no
+decl bool expandtab false
 
-hook global WinSetOption expandtab=true %[
-    hook global InsertChar \t %{ exec -draft h@ }
-]
+hook global WinSetOption expandtab=true %{
+  hook window InsertChar \t -group expandtab %{ exec -draft <left>@ }
+}
+
+hook global WinSetOption expandtab=false %{
+  rmhooks window expandtab
+}
+

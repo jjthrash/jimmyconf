@@ -1,0 +1,21 @@
+hook global BufCreate .*\.clj %{
+    set buffer filetype clojure
+}
+
+addhl -group / regions -default code clojure \
+    string %{"} %{"} '' \
+    comment ; $ ''
+
+addhl -group /clojure/string fill string
+addhl -group /clojure/comment fill comment
+
+hook global WinSetOption filetype=clojure %{
+    addhl ref clojure
+    set buffer indentwidth 2
+    set buffer tabstop 2
+    set buffer expandtab true
+}
+
+hook global WinSetOption filetype=(?!clojure).* %{
+    rmhl objc
+}
