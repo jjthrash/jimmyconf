@@ -1,0 +1,28 @@
+# ~/.tmuxinator/policy.yml
+
+name: policy
+root: ~/Documents/bradford-policy/
+
+# Optional tmux socket
+# socket_name: foo
+
+# Runs before everything. Use it to start daemons etc.
+# pre: sudo /etc/rc.d/mysqld start
+
+# Runs in each window and pane before window/pane specific commands. Useful for setting up interpreter versions.
+# pre_window: rbenv shell 2.0.0-p247
+
+# Pass command line options to tmux. Useful for specifying a different tmux.conf.
+# tmux_options: -f ~/.tmux.mac.conf
+
+windows:
+  - policy:
+      layout: c87e,278x73,0,0{174x73,0,0,3,103x73,175,0[103x18,175,0,7,103x17,175,19,11,103x36,175,37,10]}
+      panes:
+        - edit:
+          - kak -s policy
+        - guard:
+          - echo \# be guard
+        - serve:
+          - echo \# be ruby serve.rb
+        -
