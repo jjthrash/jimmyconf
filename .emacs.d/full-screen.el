@@ -1,0 +1,12 @@
+(defun bja-osx-max-screen ()
+  "Make Emacs take up the full screen w/o going into native fullscreen mode"
+  (interactive)
+  (let* ((geometry (assoc 'geometry (car (display-monitor-attributes-list))))
+         (width (nth 3 geometry))
+         (height (nth 4 geometry)))
+    (setq ns-auto-hide-menu-bar t)
+    (set-frame-position (selected-frame) 0 -22)
+    (set-frame-size (selected-frame)
+                    (- width 25)
+                    (- height 5)
+                    t)))
