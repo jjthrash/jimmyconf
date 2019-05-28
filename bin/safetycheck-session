@@ -1,0 +1,7 @@
+#!/bin/sh
+
+cd ~/Code/safetycheck
+
+tmux new-session -d -s sc -n code
+tmux new-window -d -t sc -n data -c "`~/bin/safetycheck-appdir 7.0`"
+tmux new-window -d -t sc -n server -c ~/Code/safetycheck-api

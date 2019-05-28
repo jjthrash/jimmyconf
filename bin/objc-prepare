@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+puts <<END
+- (void)prepareForSegue:(UIStoryboardSegue*)segue sender:(id)sender {
+    if ([segue.identifier isEqualToString:@""]) {
+    }
+}
+END

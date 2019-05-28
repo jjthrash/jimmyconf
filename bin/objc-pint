@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+puts <<END
+@interface #{ARGV[0]} ()
+
+
+
+@end
+END

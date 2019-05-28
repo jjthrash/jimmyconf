@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+NOTES = %w()
+def transpose(cord, semitones)
+  
+end
+
+if __FILE__ == $0
+  semitones = ARGV[0]
+  $stdout.write(transpose($stdin.read, semitones.to_i))
+end

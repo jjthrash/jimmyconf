@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+
+require 'nokogiri'
+require 'json'
+require 'time'
+
+def get_media_url(item)
+  media_content = item.xpath("media:content/@url", :media => "http://www.rssboard.org/media-rss").first&.value
+  if media_content&.length&.>(0)
+    return media_content
+  end
+
+  item.xpath("enclosure/@url").first&.value
+end
+
+def item_to_hash(item)
+  {
+    "title" => item.css("title").first.text,
+    "pubDate" => Time.parse(item.css("pubDate").first.text),
+    "url" => get_media_url(item),
+    "itunesSeason" => item.xpath("itunes:season", :itunes => "http://www.itunes.com/dtds/podcast-1.0.dtd").first&.text,
+    "itunesEpisode" => item.xpath("itunes:episode", :itunes => "http://www.itunes.com/dtds/podcast-1.0.dtd").first&.text,
+  }
+end
+
+def rss_to_hash(rss)
+  doc = Nokogiri::XML(rss)
+  episodes = doc.xpath("//item").map {|item|
+    item_to_hash(item)
+  }
+
+  title = doc.xpath("//channel/title").first.text
+  {
+    'title' => title,
+    'episodes' => episodes,
+  }
+end
+
+def rss_to_json(rss)
+  JSON.generate(rss_to_hash(rss))
+end
+
+if __FILE__ == $0
+  puts JSON.generate(rss_to_hash($stdin.read)['episodes'])
+end

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+ssid=`/Users/jjthrash/bin/current_ssid`
+
+if [ "$ssid" = "FreedomBird" -o "$ssid" = "freedompop-8244" ]; then
+    curl -XPUT \
+         -d '{"timeout" : 120000, "number" : "+19196277546", "message" : "Don'"'"'t forget your FreedomPop!"}' \
+         -H "Content-Type: application/json" \
+         https://jjthrash:arglebargle@deadman-jim.herokuapp.com/timers/freedompop-reminder
+fi

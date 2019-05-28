@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+contents = $stdin.read
+
+IO.popen("pbcopy", "w+") do |io|
+  io.write(contents)
+end
+
+$stdout.write contents

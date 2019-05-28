@@ -1,0 +1,6 @@
+#!/bin/sh
+
+kill_tunnels
+
+ssh -Nf jjthrash@util.brownbirdlabs.com -D 1080
+ssh -f -N -L 7000:irc.freenode.net:6667 jjthrash@util.brownbirdlabs.com

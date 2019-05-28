@@ -1,0 +1,1 @@
+git branch --merged | grep -v master | grep -v staging | xargs git branch -d

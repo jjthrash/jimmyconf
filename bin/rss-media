@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require 'nokogiri'
+
+doc = Nokogiri::XML($stdin.read())
+puts doc.xpath("//media:content/@url", :media => "http://www.rssboard.org/media-rss").map(&:value)
+puts doc.xpath("//enclosure/@url").map(&:value)

@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+
+def commit_stream(onto)
+  `git log --pretty=format:%H #{onto}..HEAD`.lines.map(&:chomp)
+end
+
+def chunked_rebase(branch, onto, chunk_size)
+  orig_head = `git rev-parse #{branch}`.chomp
+  commits = commit_stream(onto)
+  puts <<-EOT
+git branch -D chunk-src
+git checkout -b chunk-dst #{onto}
+git checkout -b chunk-src #{onto}
+
+  EOT
+  commits.reverse.each_slice(chunk_size) do |commits|
+    puts <<-EOT
+git checkout chunk-src; git reset --hard #{commits[-1]}
+git rebase --onto chunk-dst #{commits[0]}~1 chunk-src
+
+git checkout chunk-dst; git reset --hard chunk-src
+    EOT
+  end
+
+  puts <<-EOT
+
+git checkout #{branch}; git reset --hard chunk-src
+git branch -D chunk-src
+git branch -D chunk-dst
+  EOT
+end
+
+def current_branch
+  maybe_branch = `git branch`.lines.grep(/^\*/)[0].chomp[2..-1]
+  if maybe_branch =~ /\(detached from /
+    nil
+  else
+    maybe_branch
+  end
+end
+
+if __FILE__ == $0
+  onto = ARGV[0]
+  chunk_size = (ARGV[1] || "5").to_i
+
+  if onto.nil?
+    puts "Please select an 'onto' branch"
+    exit 1
+  end
+
+  branch = current_branch
+
+  if branch.nil?
+    puts "Please check out a real branch"
+    exit 1
+  end
+
+  chunked_rebase(branch, onto, chunk_size)
+end

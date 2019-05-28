@@ -1,0 +1,11 @@
+#!/usr/bin/env macruby
+
+def plist_dict(plist_path)
+  NSDictionary.dictionaryWithContentsOfFile(plist_path)
+end
+
+def bundle_version(plist_path)
+  plist_dict(plist_path)['CFBundleVersion'].chomp
+end
+
+puts bundle_version(ARGV[0])

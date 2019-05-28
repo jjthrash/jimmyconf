@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+
+#Download a YouTube video with metadata
+#Clean up the audio
+#Assign ID3
+
+def podcastify(url)
+  system("youtube-dl --write-info-json -o 'output.%(ext)s' -x '#{url}'")
+  # now we have output.info.json and output.???
+  descriptor = JSON.parse(File.read("output.info.json"))
+
+  audio_file = strip_ext(descriptor["_filename"]) + "." + descriptor["acodec"]
+  system("munge_audio #{audio_file}")
+
+  # now we have output.mp3
+  title = descriptor["title"]
+  system("id3v2", "-a", descriptor["uploader"], "-t", title)
+
+  File.mv("output.mp3", cleaned_filename("#{title}.mp3"))
+
+  File.rm("output.info.json")
+  File.rm(audio_file)
+end
+
+def cleaned_filename(filename)
+  filename.gsub("'", "").
+      gsub(/\s+/, "-").
+      gsub(/[^A-Za-z0-9\-_.]/, '').
+      downcase
+end
+
+def strip_ext(path)
+  File.basename(path, File.extname(path))
+end
+
+if __FILE__ == $0
+  podcastify(ARGV[0])
+end

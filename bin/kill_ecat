@@ -1,0 +1,1 @@
+ps -fu $USER | grep eCat | grep -v '(eCat)' | grep -v grep | awk '{ print $2 }' | xargs kill

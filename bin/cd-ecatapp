@@ -1,0 +1,4 @@
+#!/bin/sh
+
+appdir=`find . -type d -name eCat.app`
+cd `dirname appdir`

@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+def newguess(l, h)
+  (l + h) / 2
+end
+
+lower = ARGV[0].to_f
+upper = ARGV[1].to_f
+guess = newguess(lower, upper)
+
+puts "First guess: #{guess}"
+while dir = STDIN.gets
+  case dir.chomp
+  when "l"
+    upper = guess
+  when "h"
+    lower = guess
+  else
+    puts "h or l, please"
+  end
+
+  guess = newguess(lower, upper)
+  puts "guess: #{guess}"
+end

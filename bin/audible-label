@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Assumes names of the form <album><track>.mp3, where album is some alpha sequence and track is numeric, not zero padded
+for file in `ls *.mp3 *.ogg`; do
+  album=`echo $file | ruby -e 'puts $stdin.read.scan(/[A-Za-z]+/)[0]'`
+  track=`echo $file | ruby -e 'puts $stdin.read.scan(/\d+/)[0]'`
+  id3v2 -A "$album" -T "$track" $file
+done

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+tmux-current-layout > $HOME/.tmux-stored-layout

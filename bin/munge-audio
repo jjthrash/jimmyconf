@@ -1,0 +1,71 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+require 'shellwords'
+
+#infile="$1"
+#outfile=`basename `
+
+def wav?(path)
+  File.extname(path).downcase == ".wav"
+end
+
+def with_new_extension(extension, path)
+  ext = File.extname(path)
+  base = File.basename(path, ext)
+  "#{base}.#{extension}"
+end
+
+def cleaned_filename(filename)
+  filename.gsub("'", "").
+      gsub(/\s+/, "-").
+      gsub(/[^A-Za-z0-9\-_.]/, '').
+      downcase
+end
+
+def cleaned_path(path)
+  dir = File.dirname(path)
+  file = File.basename(path)
+  File.join(dir, cleaned_filename(file))
+end
+
+def clean_filename!(path)
+  new_path = cleaned_path(path)
+  return path if File.expand_path(new_path) == File.expand_path(path)
+
+  puts "Cleaning filename..."
+  FileUtils.mv(path, new_path)
+  new_path
+end
+
+def ensure_wav!(path)
+  return path if wav?(path)
+  new_path = with_new_extension("wav", path)
+  puts "Converting to WAV..."
+  system("ffmpeg -i #{Shellwords.escape(path)} #{Shellwords.escape(new_path)} > /dev/null 2>&1")
+  new_path
+end
+
+def compand_and_encode!(path)
+  new_path = with_new_extension("mp3", path)
+  puts "Companding and converting to MP3..."
+  system("sox #{Shellwords.escape(path)} #{Shellwords.escape(new_path)} compand 0.3,0.8 6:-70,-60,-20 -10 norm -6")
+  new_path
+end
+
+def process(path)
+  path = clean_filename!(path)
+  path = ensure_wav!(path)
+  path = compand_and_encode!(path)
+  puts "Done encoding #{path}"
+end
+
+if __FILE__ == $0
+  if ARGV.count != 1
+    puts "provide a filename"
+    exit(1)
+  end
+
+  process(ARGV[0])
+end
+

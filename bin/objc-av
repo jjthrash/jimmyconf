@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+TEMPLATE = <<END
+UIAlertView *av = [[UIAlertView alloc] initWithTitle:@"title"
+                                             message:@"message"
+                                            delegate:nil
+                                   cancelButtonTitle:@"OK"
+                                   otherButtonTitles:nil];
+[av show];
+END
+
+puts TEMPLATE
+

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+output=`build-current-kakoune-command-template.sh`
+
+if [ -z $output ]; then
+  echo -n no
+else
+  echo -n yes
+fi

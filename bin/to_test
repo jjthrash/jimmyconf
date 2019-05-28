@@ -1,0 +1,3 @@
+#!/bin/bash
+
+jq '.cards[] | select(.idList == "551c2f56abfb4cbe6802ddde") | select(.closed = false) | .name'

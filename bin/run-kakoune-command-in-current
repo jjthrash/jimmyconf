@@ -1,0 +1,7 @@
+#!/bin/bash
+
+IFS=@ read client session <<< "`build-current-kakoune-command-template.sh`"
+
+run-kakoune-command "$client" "$session" "$*"
+
+

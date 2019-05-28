@@ -1,0 +1,3 @@
+#!/bin/sh
+
+tar zcvf snapshot.tgz Documents/database.db Documents/eCatCD.sqlite* #Library/Preferences/com.supercatsolutions.eCat.plist

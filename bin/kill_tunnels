@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+`ps -ef | grep ssh`.each_line do |p|
+  if p =~ /\s*\d+\s*(\d+).*?ssh -Nf jjthrash/
+    puts "killing #{p}"
+    `kill -9 #{$1}`
+  elsif p =~ /\s*\d+\s*(\d+).*?ssh -f -N -L 7000/
+    puts "killing #{p}"
+    `kill -9 #{$1}`
+  end
+end

@@ -1,0 +1,120 @@
+#!/usr/bin/env ruby
+
+require 'uri'
+require 'time'
+require 'fileutils'
+require 'optparse'
+
+load File.join(File.dirname(__FILE__), "rss-json")
+
+def episode_filename(episode)
+  ext = File.extname(episode["url"])
+  basename = episode["title"].downcase.gsub(/\s+/, '_').gsub(/[^a-z0-9_]+/, '')
+  timestamp = episode["pubDate"].strftime("%Y%m%d%H%M%S")
+  "#{timestamp}-#{basename}#{ext}"
+end
+
+def ensure_mp3(filename)
+  return filename if File.extname(filename) == ".mp3"
+
+  base = File.basename(filename, File.extname(filename))
+  system("ffmpeg -i #{filename} #{base}.mp3")
+  FileUtils.rm(filename)
+  "#{base}.mp3"
+end
+
+def download_and_normalize(feed_title, episode)
+  puts "Downloading #{episode['title']}..."
+  url = episode['url']
+  filename = episode_filename(episode)
+  system("curl -L -o #{filename} #{url}")
+  filename = ensure_mp3(filename)
+
+  system("id3v2 -A \"#{feed_title}\" #{filename}")
+end
+
+def parse_range_string(range_string)
+  case range_string
+  when /^(\d+)\.\.(\d+)$/
+    ($1.to_i..$2.to_i).to_a
+  when /^(\d+)$/
+    $1.to_i
+  end
+end
+
+def parse_ranges_string(ranges_string)
+  ranges = ranges_string.split(/,/)
+  ranges.map {|range|
+    parse_range_string(range)
+  }.flatten.compact.uniq
+end
+
+def parse_arguments!(argv)
+  results = {}
+  option_parser = OptionParser.new do |opts|
+    opts.banner = "rss | #{$0} [OPTIONS]"
+    opts.on("-h", "--help", "Prints this help") do
+      results[:help] = opts.help
+    end
+    opts.on("-nN", "--newest-n=N", "Download the newest N entries") do |n|
+      results[:newest] = n.to_i
+    end
+    opts.on("-rR", "--range=R", "Download the entries described by the range; comma-delimited, ..-delimited") do |range_string|
+      results[:indices] = parse_ranges_string(range_string)
+    end
+    opts.on("-l", "--list", "List entries, in publication order") do
+      results[:list] = true
+    end
+    opts.on("-dD", "--delay=D", "Introduce a delay between each download (default 0)") do |delay_string|
+      results[:delay] = delay_string.to_i
+    end
+  end
+
+  option_parser.parse!(ARGV)
+  if ARGV.count != 0
+    results = { :help => option_parser.help }
+  end
+
+  results
+end
+
+if __FILE__ == $0
+  options = parse_arguments!(ARGV)
+
+  if options[:help]
+    puts options[:help]
+    exit(0)
+  end
+
+  feed = rss_to_hash($stdin.read)
+
+  episodes = feed['episodes'].sort_by {|episode|
+    episode['pubDate']
+  }.reverse
+
+  if options[:newest]
+    episodes = episodes[0,options[:newest]]
+  elsif options[:indices]
+    episodes = options[:indices].map {|index|
+      episodes[index]
+    }
+  end
+
+  if options[:list]
+    episodes.each_with_index do |episode, index|
+      puts "% 3d. %s %s" % [
+          index,
+          episode["pubDate"].strftime("%Y-%m-%d %H:%M"),
+          episode["title"],
+        ]
+    end
+
+    exit(0)
+  end
+
+  delay = options[:delay] || 0
+  episodes.each do |episode|
+    download_and_normalize(feed['title'], episode)
+    sleep(delay)
+  end
+end

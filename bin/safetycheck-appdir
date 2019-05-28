@@ -1,0 +1,3 @@
+#!/bin/bash
+
+appdir safetycheck.app $1

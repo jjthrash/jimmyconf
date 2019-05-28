@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+
+require 'shellwords'
+
+# Read from stdin and send results to tmux pane
+
+def blank?(string)
+  string.nil? || string.empty?
+end
+
+def build_commands(pane, lines)
+  with_enter = lines[0..-2]
+  without_enter = lines[-1,1].reject {|c| blank?(c)}
+  with_enter.map {|line|
+      keys = %Q{#{Shellwords.escape(line)} Enter}
+      "tmux send-keys -t #{pane} #{keys}"
+    } +
+    without_enter.map {|line|
+      keys = Shellwords.escape(line)
+      "tmux send-keys -t #{pane} #{keys}"
+    }
+end
+
+pane = ARGV[0]
+lines = STDIN.read.split("\n", -1) # -1 magic means keep trailing empty line
+
+commands = build_commands(pane, lines)
+
+commands.each do |command|
+  system(command)
+end

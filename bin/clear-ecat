@@ -1,0 +1,3 @@
+#!/bin/sh
+
+rm -f Documents/database.db Documents/eCatCD.sqlite* Library/Preferences/com.supercatsolutions.eCat.plist

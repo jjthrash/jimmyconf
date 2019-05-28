@@ -1,0 +1,12 @@
+#!/bin/sh
+
+cd ~/Code/cvp-ipad
+
+session=cvp
+
+tmux new-session -d -s $session -n code
+tmux split-window -d -h -p 40 -t $session:code
+tmux new-window -d -t $session -n data -c "`appdir cvp-ipad.app 7.0`"
+tmux new-window -d -t $session -n dist -c ~/Code/cvp.appost.net
+tmux new-window -d -t $session -n server -c ~/Code/clear_value_plus
+tmux split-window -d -h -p 40 -t $session:server -c ~/Code/clear_value_plus

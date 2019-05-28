@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+TEMPLATE = <<END
+@protocol {{Class}}Delegate;
+
+@property (nonatomic, weak)  id<{{Class}}Delegate> delegate;
+
+@protocol {{Class}}Delegate <NSObject>
+
+@end
+END
+
+puts TEMPLATE.gsub(/{{Class}}/, ARGV[0])

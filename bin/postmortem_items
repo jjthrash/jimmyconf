@@ -1,0 +1,7 @@
+#!/bin/bash
+
+for file in `this_week_org`; do
+  if [ -f $file ]; then
+    grep -Hi postmortem $file
+  fi
+done

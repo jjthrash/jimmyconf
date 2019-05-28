@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+def make_toc(input)
+  lines = input.readlines.grep(/^#/).map(&:chomp)
+  lines.map {|line|
+    line =~ /^(#+) (.*)$/
+    hashes = $1
+    words = $2
+    dashes = "  " * (hashes.length - 1) + "-"
+    uri = "#" + words.downcase.gsub(/ /, '-')
+    "#{dashes} [#{words}](#{uri})\n"
+  }.join
+end
+
+def get_input(argv)
+  if argv[0]
+    File.open(argv[0], 'r')
+  else
+    $stdin
+  end
+end
+
+if __FILE__ == $0
+  input = get_input(ARGV)
+  print(make_toc(input))
+end

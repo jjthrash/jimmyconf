@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+puts <<END
+for (NSString *keyPath in [self observedKeyPaths]) {
+    [self addObserver:self forKeyPath:keyPath options:0 context:NULL];
+}
+
+- (void)dealloc {
+    for (NSString *keyPath in [self observedKeyPaths]) {
+        [self removeObserver:self forKeyPath:keyPath];
+    }
+}
+
+- (NSArray*)observedKeyPaths {
+    return @[@""];
+}
+
+#pragma mark KVO
+
+- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context {
+    if ([keyPath isEqualToString:@""]) {
+    }
+    else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+END

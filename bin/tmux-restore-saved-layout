@@ -1,0 +1,8 @@
+#!/bin/bash
+
+FILE=$HOME/.tmux-stored-layout
+if [ -f $FILE ]; then
+  tmux select-layout $(cat $FILE)
+else
+  exit 1
+fi

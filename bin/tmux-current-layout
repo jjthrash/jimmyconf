@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+def window_layout(window)
+  window =~ /\[layout (\S+)\]/
+  $1
+end
+
+def current_window(windows)
+  windows.find { |window|
+    window.split(/\s+/)[1].end_with?('*')
+  }
+end
+
+def windows
+  `tmux list-windows`.lines.map(&:chomp)
+end
+
+def current_layout
+  window = current_window(windows)
+  window_layout(window)
+end
+
+if __FILE__ == $0
+  puts current_layout
+end

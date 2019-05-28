@@ -1,0 +1,8 @@
+#!/bin/sh
+
+cd ~/Code/sarreid_ios/eCatalog
+
+tmux new-session -d -s ecat -n code
+tmux split-window -d -h -p 40 -t ecat:code
+tmux new-window -d -t ecat -n data -c "`ecat-appdir 7.0`"
+tmux new-window -d -t ecat -n dist -c ~/Code/ecat.appost.net

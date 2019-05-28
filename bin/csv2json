@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+require 'csv'
+require 'json'
+
+header = nil
+CSV.open(ARGV[0]).each do |line|
+  if header.nil?
+    header = line
+    next
+  end
+
+  puts JSON.generate(header.zip(line).to_h)
+end

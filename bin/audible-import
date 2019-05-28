@@ -1,0 +1,7 @@
+#!/bin/sh
+
+for file in `ls *.bin`; do
+  echo $file
+  base=`basename $file .bin`
+  pv $file | sox --type raw --rate 44100 -c2 -b16 --endian little --encoding signed-integer - --type mp3 $base.mp3
+done

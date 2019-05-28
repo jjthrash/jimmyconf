@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+
+require 'date'
+
+def most_recent_monday
+  date = Date.today
+  while !date.monday?
+    date = date - 1
+  end
+
+  date
+end
+
+def week
+  start = most_recent_monday
+  (0..6).map {|i|
+    start + i
+  }
+end
+
+week.each do |d|
+  puts d.strftime("%Y%m%d.org")
+end

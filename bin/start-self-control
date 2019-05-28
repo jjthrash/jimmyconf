@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if [ $# != 1 ]; then
+  echo specify number of minutes
+  exit 1
+fi
+
+defaults write org.eyebeam.SelfControl BlockDuration -int $1
+#defaults write org.eyebeam.SelfControl HostBlacklist -array facebook.com news.ycombinator.com
+defaults read org.eyebeam.SelfControl
+sudo /Applications/SelfControl.app/Contents/MacOS/org.eyebeam.SelfControl $(id -u $(whoami)) --install

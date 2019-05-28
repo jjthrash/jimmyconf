@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require 'time'
+
+t = Time.parse("00:00")
+s = 48.times.map {|i|
+  (t+i*30*60).strftime("%H:%M")
+}
+puts s
