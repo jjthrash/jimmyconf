@@ -65,7 +65,6 @@ end
 
 def branch_statuslog(branch, date_from, date_to = nil)
   date_to ||= date_from + 7
-  old_branch = current_branch
   result =`statuslog #{date_from} #{date_to} #{branch}`
   result.chomp.split("\n")
 end

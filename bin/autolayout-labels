@@ -2,7 +2,7 @@
 
 class Namer
   METASYNTACTIC_VARIABLES = File.readlines("/usr/share/dict/propernames").map(&:chomp).shuffle
-  ADDR_REGEX = /0x[0-9a-f]{7,8}/
+  ADDR_REGEX = /0x[0-9a-f]{7,12}/
 
   def build_replacement_map(text)
     text.

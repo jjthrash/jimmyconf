@@ -1,9 +1,25 @@
-face Search black,yellow
+face global Search black,yellow
 
+# like Vim
 map global normal <c-f> <pagedown>
 map global normal <c-b> <pageup>
-#map global normal <c-e> vj
-#map global normal <c-y> vk
+
+map global insert <c-q> <a-\;>
+
+map global insert <f1> <esc>
+map global normal <f1> <esc>
+
+map global insert <c-o> <esc>O
+
+map global insert <a-[> <a-\;><
+map global insert <a-]> <a-\;>>
+
+#set global ncurses_set_title=true
+
+# trim whitespace from beginning and end of selection
+map global user } 1s\A\s*(.*?)\s*\z<ret>
+
+map global user * <a-i>w*n
 
 #map global insert <c-w> %{ <esc> <a-a>wd<space>a }
 
@@ -28,34 +44,73 @@ map global normal <c-b> <pageup>
 #    }
 #}
 
-def -allow-override fe %{
-  eval %{
-        %sh{
-            result=$( find . -type f \( \! -path "*.git/*" \) -and \( \! -path ".*sw?" \) | fzf-tmux )
+#newer
+#hook global WinCreate .* %{
+#    %sh{
+#        tools=(
+#            ## position in the buffer, in percent
+#            "%opt{modeline_pos_percent}\\%"
+#            ## cursor coordinates in the buffer
+#            "%val{cursor_line}:%val{cursor_char_column}"
+#            ## filetype of the buffer detected by kak
+#            "%opt{filetype}"
+#            ## name of the buffer
+#            "%val{bufname}"
+#            ## git branch
+#            "%opt{modeline_git_branch}"
+#        )
+#        fmt_line=""
+#
+#        for t in "${tools[@]}"; do
+#            test -z "${t}" && continue
+#            test -n "${fmt_line}" && fmt_line="${t} ${fmt_line}" || fmt_line="${t}"
+#        done
+#
+#        printf %s "set window modelinefmt '${fmt_line}'"
+#    }
+#}
+
+def -override select-next-word %{ exec %{ /\b\w+\b<ret> } }
+map global user w :select-next-word<ret>
+def -override select-including-next-word %{ exec %{ ?\b\w+\b<ret> } }
+map global user W :select-including-next-word<ret>
+def -override select-previous-word %{ exec %{ <a-/>\b\w+\b<ret> } }
+map global user <a-w> :select-previous-word<ret>
+def -override select-including-previous-word %{ exec %{ <a-?>\b\w+\b<ret> } }
+map global user <a-W> :select-including-previous-word<ret>
+
+def -override fe %{
+  eval %sh{
+            result=$( fd --type f | fzf-tmux )
             if [ $? ]; then
               echo e $result
             else
               echo echo Cancelled
             fi
           }
-        }
 }
 
-def -allow-override fb %{
+def -override fb %{
   eval %{b %sh{ ( echo $kak_buflist|sed -n 1'p'| tr ':' '\n' | fzf-tmux )}}
 }
 
-def gq %{ exec |fold<space>-s<space>-w75<ret><a-s>s\h+$<ret>d }
+def gq %{ exec |fold<space>-s<space>-w75<ret><a-s>s\h+$<ret>d<space> }
+def regq %{ exec <a-i>pH<a-j>:gq<ret> }
+map global user g %{ exec :regq<ret> }
 def ruby %{ eval set buffer filetype ruby }
 def objc %{ eval set buffer filetype objc }
 def js %{ eval set buffer filetype javascript }
 def swift %{ eval set buffer filetype swift }
 
+def -override wrap %{
+  eval add-highlighter buffer/ wrap -word -width 80
+}
+
 hook global WinCreate .* %{
-    addhl number_lines
-    addhl regex \h+$ 0:red,red
+    addhl window/ number-lines
+    addhl window/ regex \h+$ 0:red,red
     set buffer expandtab true
-    addhl dynregex '$reg{/}' 0:Search
+    addhl window/ dynregex '%reg{/}' 0:Search
 }
 
 # This goes here, because my file cmd has been hacked to support objc
@@ -63,9 +118,14 @@ hook global BufSetOption mimetype=text/x-objc %{
     set buffer filetype objc
 }
 
+hook global FocusIn .* %{
+  echo -debug focus in!
+}
+
 hook global WinSetOption filetype=objc %[
-    rmhooks window c-family-indent
     rmhooks window c-family-hooks
+    rmhooks window c-family-indent
+    rmhooks window c-family-insert
 
     set buffer tabstop 4
     set buffer indentwidth 4
@@ -80,17 +140,17 @@ hook global WinSetOption filetype=objc %[
     def oclg %{ exec %{XypjXs"<ret>i\<esc>XiNSLog(@"<esc>a");<esc>X} }
     def ocav %{ exec <a-|>objc-av<ret> }
 
-  def -allow-override objc-del %{ exec %{ |objc-del<space> }
+  def -override objc-del %{ exec %{ |objc-del<space> }
                                        %sh{ basename ${kak_bufname} ".h" }
                                        %{ <ret> }}
-  def -allow-override objc-pint %{ exec %{ |objc-pint<space> }
+  def -override objc-pint %{ exec %{ |objc-pint<space> }
                                         %sh{ basename ${kak_bufname} ".m" }
                                         %{ <ret> }}
 
     def comment %[ exec |comment_uncomment<space>//<ret> ]
     #map normal <c-c> %{eval comment<ret>}
-    addhl show_matching
-    addhl flag_lines
+    addhl window show_matching
+    addhl window flag_lines
 ]
 
 hook global WinSetOption filetype=rust %[
@@ -105,6 +165,7 @@ hook global WinSetOption filetype=ruby %[
     set buffer tabstop 2
     set buffer indentwidth 2
     rmhooks window ruby-indent
+    rmhooks window ruby-insert
     rmhooks window ruby-hooks
 
     def comment %[ exec |comment_uncomment<space>'#'<ret> ]
@@ -140,9 +201,18 @@ set global autoreload yes
 
 decl str bg
 hook global WinSetOption bg=dark %[
-    face PrimaryCursor black,white
+    face global PrimaryCursor black,white
+    face global SecondaryCursor white,blue
 ]
 
 hook global WinSetOption bg=light %[
-    face PrimaryCursor white,black
+    face global PrimaryCursor white,black
+    face global SecondaryCursor white,blue
 ]
+
+def -override light %{ eval set global bg light }
+def -override dark %{ eval set global bg dark }
+
+def -override capitalize-sentence %{
+  exec -draft %{"pZ<a-:><a-;>;~"pz}
+}

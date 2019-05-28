@@ -1,33 +1,8 @@
-#!/usr/bin/env ruby
+#!/bin/bash
 
-# Show all current git branches, sorted by most recent first
+branches=`git branch $* | perl -pe 's/^..(.*?)( ->.*)?$/\1/'`
 
-def branches(by_ref_timestamp = false)
-  if by_ref_timestamp
-    [] #TODO
-  else
-    `git branch`.
-        split("\n").
-        map(&:strip).
-        map {|branch| branch.sub(/^\* /,'')}.
-        reject {|b| b =~ /^\(no branch\)$/ }.
-        reject {|b| b =~ /^\(detached from / }
-  end
-end
-
-if __FILE__ == $0
-  begin
-    by_ref_timestamp = ARGV[0] == '-r'
-
-    sorted = branches(by_ref_timestamp).sort_by do |branch|
-      commit = `git cat-file -p #{branch}`
-      commit.lines.grep(/^committer/)[0].scan(/\d{5,}/)[0].to_i
-    end
-
-    sorted.reverse.each do |branch|
-      date = `git log -1 #{branch}`.lines.grep(/^Date:/)[0].sub(/^Date:\s+/,'').chomp
-      puts "#{branch} - #{date}"
-    end
-  rescue
-  end
-end
+for k in $branches; do
+  echo -e `git show --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k -- |
+    head -n 1`\\t$k
+done | sort -r

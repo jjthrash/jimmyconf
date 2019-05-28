@@ -1,20 +1,59 @@
-#!/bin/bash
+#!/usr/bin/env macruby
 
-app_dir=$1
-ver=$2
+class String
+  def blank?
+    self.empty?
+  end
+end
 
-if [ "0$app_dir" = "0" ]; then
-  echo
-  echo Usage:
-  echo "    $0 <app_dir> [<iOS version dir>]"
-  echo Specify the app directory name, e.g. Skitch.app
-  echo
-  exit 1
-fi
+class NilClass
+  def blank?
+    true
+  end
+end
 
-if [ "0$ver" = "0" ]; then
-  ver=7.0
-fi
+def device_info(path)
+  dict = NSDictionary.dictionaryWithContentsOfFile(File.join(path, "device.plist"))
+  [dict["deviceType"], dict["runtime"]].map {|dotted|
+    dotted.split('.')[-1]
+  }
+end
 
-result=`find ~/Library/Application\ Support/iPhone\ Simulator/$ver -type d -name "$app_dir"`
-echo `dirname "$result"`
+def device_dirs
+  Dir.glob("/Users/jjthrash/Library/Developer/CoreSimulator/Devices/*").map {|dir|
+    device_info(dir) + [dir]
+  }
+end
+
+def device_dir(dirs, dev, ver)
+  dirs.select {|d, v, dir|
+    d == dev && v == ver
+  }[0][-1]
+end
+
+if __FILE__ == $0
+  app_dir, requested_dev, requested_ver = ARGV
+
+  if app_dir.blank?
+    puts <<-USAGE
+  Usage:
+    #{$0} <app_dir> [<iOS version dir>]
+    Specify the app directory name, e.g. Skitch.app
+
+    USAGE
+
+    exit 1
+  end
+
+  ver = requested_ver.blank? ? 'iOS-8-0' : requested_ver
+  dev = requested_dev.blank? ? 'iPad-Air' : requested_dev
+
+  root = device_dir(device_dirs, dev, ver)
+
+  result =
+    begin
+      container_app_dir = `find ~/Library/Developer/CoreSimulator/Devices -type d -name "#{app_dir}"`
+      app_uuid = File.basename(File.dirname(container_app_dir))
+      File.expand_path("#{container_app_dir}/../../../../Data/Application/#{app_uuid}/Documents")
+    end
+end

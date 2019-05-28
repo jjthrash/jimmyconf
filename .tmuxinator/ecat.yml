@@ -1,7 +1,7 @@
 # ~/.tmuxinator/safetycheck.yml
 
 name: ecat
-root: ~/Code/sarreid_ios/eCatalog
+root: ~/Code/supercat/sarreid_ios/eCatalog
 
 # Optional tmux socket
 # socket_name: foo
@@ -16,18 +16,48 @@ root: ~/Code/sarreid_ios/eCatalog
 # tmux_options: -f ~/.tmux.mac.conf
 
 windows:
-  - editor:
-      layout: 04ed,278x73,0,0{174x73,0,0,7,103x73,175,0[103x21,175,0,11,103x51,175,22,26]}
+  - ecat:
+      layout: 99a0,278x73,0,0{174x73,0,0,0,103x73,175,0,5}
       panes:
-        - vim
-        - pt stories | ttool trim
+        - kak -s ecat
         -
-  - data: cd "`appdir eCat.app 7.0.3`"
-  - dist: cd ~/Code/ecat.appost.net
+  - data: cd "`appdir eCat.app 7.1`"
   - server:
       layout: 199f,278x73,0,0{174x73,0,0,0,103x73,175,0,2}
       panes:
         - edit:
-          - cd ~/Code/supercat_server
-          - vim
-        - cd ~/Code/supercat_server
+          - cd ~/Code/supercat/supercat_server; kak -s server
+        - cd ~/Code/supercat/supercat_server
+  - deploy:
+      layout: 99a0,278x73,0,0{174x73,0,0,0,103x73,175,0,5}
+      panes:
+        - edit:
+          - cd ~/Code/supercat/deploy
+          - kak -s deploy
+        - deploy:
+          - cd ~/Code/general/ansible
+          - source ./hacking/env-setup
+          - cd ~/Code/supercat/deploy
+  - docs:
+      layout: c87e,278x73,0,0{174x73,0,0,3,103x73,175,0[103x18,175,0,7,103x17,175,19,11,103x36,175,37,10]}
+      panes:
+        - edit:
+          - cd ~/Code/supercat/docs
+          - kak
+        - guard:
+          - cd ~/Code/supercat/docs
+          - echo \# be guard
+        - serve:
+          - cd ~/Code/supercat/docs
+          - echo \# be ruby serve.rb
+        - cd ~/Code/supercat/docs
+  - pt:
+      layout: 99a0,278x73,0,0{174x73,0,0,0,103x73,175,0,5}
+      panes:
+        - edit:
+          - cd /Users/jjthrash/Code/general/ptrepl
+          - kak
+        - repl:
+          - cd /Users/jjthrash/Code/general/ptrepl
+          - be irb -r'./go'
+

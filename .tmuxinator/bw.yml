@@ -1,7 +1,7 @@
 # ~/.tmuxinator/safetycheck.yml
 
 name: bw
-root: ~/Code/bravewriter_classroom
+root: ~/Code/bravewriter/bravewriter_classroom
 
 # Optional tmux socket
 # socket_name: foo

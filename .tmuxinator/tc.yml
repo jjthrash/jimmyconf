@@ -17,10 +17,8 @@ root: /Users/jjthrash/Code/eClinical/eClinicalOS_App
 
 windows:
   - editor:
-      layout: 04ed,278x73,0,0{174x73,0,0,7,103x73,175,0[103x21,175,0,11,103x51,175,22,26]}
+      layout: 6328,238x68,0,0{154x68,0,0,26,83x68,155,0,30}
       panes:
-        - vim
         -
         -
-  - data: cd "`appdir eClinicalDashboard.app 7.0.3`"
-  - dist: cd ~/Code/merge.appost.net
+  - data: cd "`appdir eClinicalDashboard.app 7.1`"

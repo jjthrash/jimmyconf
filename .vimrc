@@ -24,6 +24,7 @@ set nowrap
 set linebreak
 set showbreak=..
 set nobackup
+set history=2000
 set viminfo='20,\"50,n$HOME/.viminfo
 set ruler
 set tabstop=2
@@ -126,6 +127,7 @@ vmap <leader>rs :s/\s\+$//<CR>:noh<CR>
 map <leader>rt :retab<CR>
 nmap <leader>q :nohlsearch<CR>
 nmap <leader>c* :let @* = @"<CR>
+nmap <leader>gv `[V`]
 
 " dragvisuals.vim
 vmap  <expr>  <LEFT>   DVB_Drag('left')

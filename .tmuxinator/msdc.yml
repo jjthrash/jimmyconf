@@ -17,10 +17,9 @@ root: /Users/jjthrash/Code/eClinical/SDC
 
 windows:
   - editor:
-      layout: 04ed,278x73,0,0{174x73,0,0,7,103x73,175,0[103x21,175,0,11,103x51,175,22,26]}
+      layout: 0a89,278x73,0,0{174x73,0,0,41,103x73,175,0,45}
       panes:
-        - vim
         -
         -
-  - data: cd "`appdir SDC.app 7.0.3`"
-  - dist: cd ~/Code/merge.appost.net
+  - data: cd "`appdir SDC.app 7.1`"
+  - common: cd ~/Code/eClinical/iOS-Common

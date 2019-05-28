@@ -5,9 +5,11 @@ BACKUP="nice rsync -av --delete"
 
 if [ -d "$BASE" ]; then
 
-    $BACKUP $HOME/Archive            \
-            $HOME/Documents          \
-            $HOME/Library/Containers \
+    $BACKUP $HOME/Archive                \
+            $HOME/Documents              \
+            $HOME/Library/Containers     \
+            $HOME/Code                   \
+            --exclude '**'/Code/general \
               "$BASE"/Backup
 
     echo Last backup: `date` > "$BASE"/LAST_BACKUP
